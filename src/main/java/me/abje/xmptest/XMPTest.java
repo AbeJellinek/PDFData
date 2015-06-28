@@ -11,7 +11,7 @@ import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import java.io.*;
 
 public class XMPTest {
-    public static final String SCHEMA_OD = "http://ns.example.com/od/1.0/";
+    public static final String SCHEMA_OD = "http://xmptest.abje.me/od/1.0/";
 
     public static void main(String[] args) throws IOException, XMPException {
         new XMPTest().run();
