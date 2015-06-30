@@ -52,7 +52,7 @@ public class XMPIteratorImpl implements XMPIterator {
     /**
      * the node iterator doing the work
      */
-    private Iterator nodeIterator = null;
+    private Iterator<XMPPropertyInfo> nodeIterator = null;
 
 
     /**
@@ -144,7 +144,7 @@ public class XMPIteratorImpl implements XMPIterator {
     /**
      * @see java.util.Iterator#next()
      */
-    public Object next() {
+    public XMPPropertyInfo next() {
         return nodeIterator.next();
     }
 
@@ -187,7 +187,7 @@ public class XMPIteratorImpl implements XMPIterator {
      *
      * @since 29.06.2006
      */
-    private class NodeIterator implements Iterator {
+    private class NodeIterator implements Iterator<XMPPropertyInfo> {
         /**
          * iteration state
          */
@@ -224,7 +224,7 @@ public class XMPIteratorImpl implements XMPIterator {
         /**
          * the iterator for each child
          */
-        private Iterator subIterator = Collections.EMPTY_LIST.iterator();
+        private Iterator<XMPPropertyInfo> subIterator = Collections.<XMPPropertyInfo>emptyList().iterator();
         /**
          * the cached <code>PropertyInfo</code> to return
          */
@@ -349,7 +349,7 @@ public class XMPIteratorImpl implements XMPIterator {
          *
          * @see Iterator#next()
          */
-        public Object next() {
+        public XMPPropertyInfo next() {
             if (hasNext()) {
                 XMPPropertyInfo result = returnProperty;
                 returnProperty = null;

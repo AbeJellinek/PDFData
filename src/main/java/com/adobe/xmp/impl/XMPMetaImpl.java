@@ -17,8 +17,10 @@ import com.adobe.xmp.options.ParseOptions;
 import com.adobe.xmp.options.PropertyOptions;
 import com.adobe.xmp.properties.XMPProperty;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -317,6 +319,55 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
 
         String itemPath = XMPPathFactory.composeArrayItemPath(arrayName, itemIndex);
         return getProperty(schemaNS, itemPath);
+    }
+
+    /**
+     * @see XMPMeta#getArray(String, String)
+     */
+    @Override
+    public List<XMPProperty> getArray(String schemaNS, String arrayName) throws XMPException {
+        ParameterAsserts.assertSchemaNS(schemaNS);
+        ParameterAsserts.assertArrayName(arrayName);
+
+        final XMPPath expPath = XMPPathParser.expandXPath(schemaNS, arrayName);
+        final XMPNode propNode = XMPNodeUtils.findNode(tree, expPath, false, null);
+
+        if (propNode != null) {
+            if (!propNode.getOptions().isArray()) {
+                throw new XMPException("Property must be array when an array is requested",
+                        XMPError.BADXPATH);
+            }
+
+            List<XMPNode> children = propNode.getUnmodifiableChildren();
+            final List<XMPProperty> value = new ArrayList<>();
+
+            for (XMPNode node : children) {
+                value.add(new XMPProperty() {
+                    public String getValue() {
+                        return node.getValue();
+                    }
+
+
+                    public PropertyOptions getOptions() {
+                        return node.getOptions();
+                    }
+
+
+                    public String getLanguage() {
+                        return null;
+                    }
+
+
+                    public String toString() {
+                        return node.getValue();
+                    }
+                });
+            }
+
+            return value;
+        } else {
+            return null;
+        }
     }
 
 

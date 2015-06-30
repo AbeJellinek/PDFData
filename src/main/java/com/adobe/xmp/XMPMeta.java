@@ -15,6 +15,7 @@ import com.adobe.xmp.options.PropertyOptions;
 import com.adobe.xmp.properties.XMPProperty;
 
 import java.util.Calendar;
+import java.util.List;
 
 
 /**
@@ -76,6 +77,9 @@ public interface XMPMeta extends Cloneable {
      * @throws XMPException Wraps all errors and exceptions that may occur.
      */
     XMPProperty getArrayItem(String schemaNS, String arrayName, int itemIndex) throws XMPException;
+
+
+    List<XMPProperty> getArray(String schemaNS, String arrayName) throws XMPException;
 
 
     /**

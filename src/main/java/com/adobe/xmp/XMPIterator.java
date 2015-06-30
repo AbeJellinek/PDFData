@@ -9,6 +9,8 @@
 
 package com.adobe.xmp;
 
+import com.adobe.xmp.properties.XMPPropertyInfo;
+
 import java.util.Iterator;
 
 
@@ -65,7 +67,7 @@ import java.util.Iterator;
  *
  * @since 25.01.2006
  */
-public interface XMPIterator extends Iterator {
+public interface XMPIterator extends Iterator<XMPPropertyInfo> {
     /**
      * Skip the subtree below the current node when <code>next()</code> is
      * called.

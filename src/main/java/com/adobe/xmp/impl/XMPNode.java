@@ -46,11 +46,11 @@ class XMPNode implements Comparable {
     /**
      * list of child nodes, lazy initialized
      */
-    private List children = null;
+    private List<XMPNode> children = null;
     /**
      * list of qualifier of the node, lazy initialized
      */
-    private List qualifier = null;
+    private List<XMPNode> qualifier = null;
     /**
      * options describing the kind of the node
      */
@@ -126,7 +126,7 @@ class XMPNode implements Comparable {
      * @return Returns the child with the requested index.
      */
     public XMPNode getChild(int index) {
-        return (XMPNode) getChildren().get(index - 1);
+        return getChildren().get(index - 1);
     }
 
 
@@ -240,7 +240,7 @@ class XMPNode implements Comparable {
      * @return Returns the qualifier with the requested index.
      */
     public XMPNode getQualifier(int index) {
-        return (XMPNode) getQualifier().get(index - 1);
+        return getQualifier().get(index - 1);
     }
 
 
@@ -591,7 +591,7 @@ class XMPNode implements Comparable {
     public void sort() {
         // sort qualifier
         if (hasQualifier()) {
-            XMPNode[] quals = (XMPNode[]) getQualifier()
+            XMPNode[] quals = getQualifier()
                     .toArray(new XMPNode[getQualifierLength()]);
             int sortFrom = 0;
             while (
@@ -604,11 +604,11 @@ class XMPNode implements Comparable {
             }
 
             Arrays.sort(quals, sortFrom, quals.length);
-            ListIterator it = qualifier.listIterator();
-            for (int j = 0; j < quals.length; j++) {
+            ListIterator<XMPNode> it = qualifier.listIterator();
+            for (XMPNode qual : quals) {
                 it.next();
-                it.set(quals[j]);
-                quals[j].sort();
+                it.set(qual);
+                qual.sort();
             }
         }
 
@@ -685,7 +685,7 @@ class XMPNode implements Comparable {
 
         // render qualifier
         if (recursive && hasQualifier()) {
-            XMPNode[] quals = (XMPNode[]) getQualifier()
+            XMPNode[] quals = getQualifier()
                     .toArray(new XMPNode[getQualifierLength()]);
             int i = 0;
             while (quals.length > i &&
@@ -697,20 +697,20 @@ class XMPNode implements Comparable {
             Arrays.sort(quals, i, quals.length);
             for (i = 0; i < quals.length; i++) {
                 XMPNode qualifier = quals[i];
-                qualifier.dumpNode(result, recursive, indent + 2, i + 1);
+                qualifier.dumpNode(result, true, indent + 2, i + 1);
             }
         }
 
         // render children
         if (recursive && hasChildren()) {
-            XMPNode[] children = (XMPNode[]) getChildren()
+            XMPNode[] children = getChildren()
                     .toArray(new XMPNode[getChildrenLength()]);
             if (!getOptions().isArray()) {
                 Arrays.sort(children);
             }
             for (int i = 0; i < children.length; i++) {
                 XMPNode child = children[i];
-                child.dumpNode(result, recursive, indent + 1, i + 1);
+                child.dumpNode(result, true, indent + 1, i + 1);
             }
         }
     }
@@ -738,9 +738,9 @@ class XMPNode implements Comparable {
      *
      * @return Returns list of children that is lazy initialized.
      */
-    private List getChildren() {
+    private List<XMPNode> getChildren() {
         if (children == null) {
-            children = new ArrayList(0);
+            children = new ArrayList<XMPNode>(0);
         }
         return children;
     }
@@ -749,17 +749,17 @@ class XMPNode implements Comparable {
     /**
      * @return Returns a read-only copy of child nodes list.
      */
-    public List getUnmodifiableChildren() {
-        return Collections.unmodifiableList(new ArrayList(getChildren()));
+    public List<XMPNode> getUnmodifiableChildren() {
+        return Collections.unmodifiableList(new ArrayList<XMPNode>(getChildren()));
     }
 
 
     /**
      * @return Returns list of qualifier that is lazy initialized.
      */
-    private List getQualifier() {
+    private List<XMPNode> getQualifier() {
         if (qualifier == null) {
-            qualifier = new ArrayList(0);
+            qualifier = new ArrayList<XMPNode>(0);
         }
         return qualifier;
     }
@@ -783,16 +783,14 @@ class XMPNode implements Comparable {
      * @param expr the search expression
      * @return Returns the found node or <code>nulls</code>.
      */
-    private XMPNode find(List list, String expr) {
+    private XMPNode find(List<XMPNode> list, String expr) {
 
-        if (list != null) {
-            for (Iterator it = list.iterator(); it.hasNext(); ) {
-                XMPNode child = (XMPNode) it.next();
+        if (list != null)
+            for (XMPNode child : list) {
                 if (child.getName().equals(expr)) {
                     return child;
                 }
             }
-        }
         return null;
     }
 
@@ -823,5 +821,13 @@ class XMPNode implements Comparable {
                 findQualifierByName(qualifierName) != null) {
             throw new XMPException("Duplicate '" + qualifierName + "' qualifier", XMPError.BADXMP);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "XMPNode{" +
+                "name='" + name + '\'' +
+                ", value='" + value + '\'' +
+                '}';
     }
 }
