@@ -9,7 +9,10 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XMPDataStorage extends DataStorage {
+/**
+ * An XMP-based data storage method. Data is stored as an array in the PDF's metadata.
+ */
+public class XMPDataStorage extends DataStorage<List<List<String>>> {
     public static final String PROP_ROW_SIZE = "RowSize";
     public static final String PROP_DATA = "Data";
 
@@ -41,10 +44,10 @@ public class XMPDataStorage extends DataStorage {
     }
 
     @Override
-    public void write(PDDocument doc, XMPMeta xmp, List<List<String>> data, int rowSize) throws XMPException {
+    public void write(PDDocument doc, XMPMeta xmp, List<List<String>> data) throws XMPException {
         PropertyOptions options = new PropertyOptions(PropertyOptions.ARRAY | PropertyOptions.ARRAY_ORDERED);
         xmp.deleteProperty(SCHEMA_OD, PROP_DATA); // Ensure that the data array does not exist.
-        xmp.setPropertyInteger(SCHEMA_OD, PROP_ROW_SIZE, rowSize);
+        xmp.setPropertyInteger(SCHEMA_OD, PROP_ROW_SIZE, data.isEmpty() ? 0 : data.get(0).size());
 
         for (List<String> row : data) {
             for (String cell : row) {

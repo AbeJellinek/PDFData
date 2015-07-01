@@ -2,27 +2,28 @@ package me.abje.xmptest;
 
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
+import com.google.common.io.ByteStreams;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class XMPDataStorageTest {
-    private XMPDataStorage dataStorage = new XMPDataStorage();
+public class AttachmentDataStorageTest {
+    private AttachmentDataStorage dataStorage = new AttachmentDataStorage();
     private PDDocument doc;
     private XMPMeta xmp;
 
     @Before
     public void setUp() throws Exception {
-        doc = PDDocument.load(getClass().getResourceAsStream("/docs/1.pdf"));
+        doc = PDDocument.load(getClass().getResourceAsStream("/docs/2.pdf"));
 
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         if (catalog.getMetadata() == null)
@@ -33,27 +34,17 @@ public class XMPDataStorageTest {
 
     @Test
     public void testRead() throws Exception {
-        List<List<String>> table = dataStorage.read(doc, xmp);
-        assertThat(table, equalTo(Arrays.asList(
-                Arrays.asList("Saturday, 13 November 2010", "2"),
-                Arrays.asList("Sunday, 14 November 2010", "4"),
-                Arrays.asList("Monday, 15 November 2010", "7"))));
+        byte[] bytes = dataStorage.read(doc, xmp);
+        assertThat(bytes, equalTo(ByteStreams.toByteArray(getClass().getResourceAsStream("/data/2.csv"))));
     }
 
     @Test
     public void testWrite() throws Exception {
-        dataStorage.write(doc, xmp, Arrays.asList(
-                Arrays.asList("Saturday, 13 November 2010", "2"),
-                Arrays.asList("Sunday, 14 November 2010", "4"),
-                Arrays.asList("Monday, 15 November 2010", "7")));
+        dataStorage.write(doc, xmp, ByteStreams.toByteArray(getClass().getResourceAsStream("/data/2.csv")));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XMPMetaFactory.serialize(xmp, out);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         doc.getDocumentCatalog().setMetadata(new PDMetadata(doc, in, false));
-
-        assertThat(xmp.getPropertyInteger(DataStorage.SCHEMA_OD, XMPDataStorage.PROP_ROW_SIZE), equalTo(2));
-        assertThat(xmp.getArray(DataStorage.SCHEMA_OD, XMPDataStorage.PROP_DATA).toString(),
-                equalTo("[Saturday, 13 November 2010, 2, Sunday, 14 November 2010, 4, Monday, 15 November 2010, 7]"));
     }
 }
