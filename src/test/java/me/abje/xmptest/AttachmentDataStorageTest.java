@@ -2,7 +2,6 @@ package me.abje.xmptest;
 
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
-import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -38,8 +37,14 @@ public class AttachmentDataStorageTest {
     @Test
     public void testRead() throws Exception {
         byte[] bytes = dataStorage.read(doc, xmp);
-        assertThat(new String(bytes, Charsets.UTF_8),
-                equalTo(CharStreams.toString(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv")))));
+        String[] lines = new String(bytes, "UTF-8").split("\n");
+        String[] sourceLines = CharStreams.toString(new InputStreamReader(getClass().
+                getResourceAsStream("/data/2.csv"))).split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            String line1 = lines[i];
+            String line2 = sourceLines[i];
+            assertThat(line1, equalTo(line2));
+        }
     }
 
     @Test
