@@ -2,7 +2,9 @@ package me.abje.xmptest;
 
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
+import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
@@ -12,6 +14,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,7 +38,8 @@ public class AttachmentDataStorageTest {
     @Test
     public void testRead() throws Exception {
         byte[] bytes = dataStorage.read(doc, xmp);
-        assertThat(bytes, equalTo(ByteStreams.toByteArray(getClass().getResourceAsStream("/data/2.csv"))));
+        assertThat(new String(bytes, Charsets.UTF_8),
+                equalTo(CharStreams.toString(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv")))));
     }
 
     @Test
