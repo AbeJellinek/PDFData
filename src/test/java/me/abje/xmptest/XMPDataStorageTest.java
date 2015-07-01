@@ -8,9 +8,10 @@ import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,19 +34,21 @@ public class XMPDataStorageTest {
 
     @Test
     public void testRead() throws Exception {
-        List<List<String>> table = dataStorage.read(doc, xmp);
-        assertThat(table, equalTo(Arrays.asList(
-                Arrays.asList("Saturday, 13 November 2010", "2"),
-                Arrays.asList("Sunday, 14 November 2010", "4"),
-                Arrays.asList("Monday, 15 November 2010", "7"))));
+        Table table = dataStorage.read(doc, xmp);
+        assertThat(table.getCells(), equalTo(Arrays.asList(
+                Arrays.asList(new Table.Cell("Saturday, 13 November 2010"), new Table.Cell("2")),
+                Arrays.asList(new Table.Cell("Sunday, 14 November 2010"), new Table.Cell("4")),
+                Arrays.asList(new Table.Cell("Monday, 15 November 2010"), new Table.Cell("7")))));
     }
 
     @Test
     public void testWrite() throws Exception {
-        dataStorage.write(doc, xmp, Arrays.asList(
-                Arrays.asList("Saturday, 13 November 2010", "2"),
-                Arrays.asList("Sunday, 14 November 2010", "4"),
-                Arrays.asList("Monday, 15 November 2010", "7")));
+        dataStorage.write(doc, xmp, new Table(Arrays.asList("Temperature forecast for Galway, Ireland", ""),
+                Arrays.asList(
+                        Arrays.asList(new Table.Cell("Saturday, 13 November 2010"), new Table.Cell("2")),
+                        Arrays.asList(new Table.Cell("Sunday, 14 November 2010"), new Table.Cell("4")),
+                        Arrays.asList(new Table.Cell("Monday, 15 November 2010"), new Table.Cell("7"))),
+                2, 3));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XMPMetaFactory.serialize(xmp, out);

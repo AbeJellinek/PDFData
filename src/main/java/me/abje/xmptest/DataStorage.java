@@ -11,7 +11,7 @@ import java.io.IOException;
  * The common superclass for all data storage methods.
  * Supports reading and writing.
  */
-public abstract class DataStorage<T> {
+public abstract class DataStorage {
     public static final String SCHEMA_OD = "http://xmptest.abje.me/od/1.0/";
 
     static {
@@ -30,7 +30,7 @@ public abstract class DataStorage<T> {
      * @return The stored triples.
      * @throws XMPException If an XMP error occurs.
      */
-    public abstract T read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException;
+    public abstract Table read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException;
 
     /**
      * Writes a list of triples to the given document.
@@ -40,5 +40,5 @@ public abstract class DataStorage<T> {
      * @param data The data to be stored.
      * @throws XMPException If an XMP error occurs.
      */
-    public abstract void write(PDDocument doc, XMPMeta xmp, T data) throws XMPException, IOException;
+    public abstract void write(PDDocument doc, XMPMeta xmp, Table data) throws XMPException, IOException;
 }

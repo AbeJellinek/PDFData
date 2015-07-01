@@ -3,18 +3,19 @@ package me.abje.xmptest;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
 
 public class AttachmentDataStorageTest {
     private AttachmentDataStorage dataStorage = new AttachmentDataStorage();
@@ -34,18 +35,14 @@ public class AttachmentDataStorageTest {
 
     @Test
     public void testRead() throws Exception {
-        byte[] docBytes = dataStorage.read(doc, xmp);
-        BufferedReader docBytesReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(docBytes)));
-        List<String> docLines = CharStreams.readLines(docBytesReader);
-        List<String> sourceLines =
-                CharStreams.readLines(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv")));
-
-        assertThat(docLines, equalTo(sourceLines));
+        Table docTable = dataStorage.read(doc, xmp);
+        Table sourceTable = Table.fromCSV(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv")));
+        assertThat(docTable, equalTo(sourceTable));
     }
 
     @Test
     public void testWrite() throws Exception {
-        dataStorage.write(doc, xmp, ByteStreams.toByteArray(getClass().getResourceAsStream("/data/2.csv")));
+        dataStorage.write(doc, xmp, Table.fromCSV(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv"))));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XMPMetaFactory.serialize(xmp, out);
