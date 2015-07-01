@@ -10,10 +10,8 @@ import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,15 +34,13 @@ public class AttachmentDataStorageTest {
 
     @Test
     public void testRead() throws Exception {
-        byte[] bytes = dataStorage.read(doc, xmp);
-        String[] lines = new String(bytes, "UTF-8").split("\n");
-        String[] sourceLines = CharStreams.toString(new InputStreamReader(getClass().
-                getResourceAsStream("/data/2.csv"))).split("\n");
-        for (int i = 0; i < lines.length; i++) {
-            String line1 = lines[i];
-            String line2 = sourceLines[i];
-            assertThat(line1, equalTo(line2));
-        }
+        byte[] docBytes = dataStorage.read(doc, xmp);
+        BufferedReader docBytesReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(docBytes)));
+        List<String> docLines = CharStreams.readLines(docBytesReader);
+        List<String> sourceLines =
+                CharStreams.readLines(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv")));
+
+        assertThat(docLines, equalTo(sourceLines));
     }
 
     @Test
