@@ -9,22 +9,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-public class AttachmentDataStorageTest {
-    private AttachmentDataStorage dataStorage = new AttachmentDataStorage();
+public class FormDataStorageTest {
+    private FormDataStorage dataStorage = new FormDataStorage();
     private PDDocument doc;
     private XMPMeta xmp;
 
     @Before
     public void setUp() throws Exception {
-        doc = PDDocument.load(getClass().getResourceAsStream("/docs/2.pdf"));
+        doc = PDDocument.load(getClass().getResourceAsStream("/docs/3.pdf"));
 
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         if (catalog.getMetadata() == null)
@@ -40,14 +39,17 @@ public class AttachmentDataStorageTest {
 
     @Test
     public void testRead() throws Exception {
-        Table docTable = dataStorage.read(doc, xmp);
-        Table sourceTable = Table.fromCSV(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv")));
-        assertThat(docTable, equalTo(sourceTable));
+        Table table = dataStorage.read(doc, xmp);
+        assertThat(table.getCells(), equalTo(Collections.singletonList(
+                Arrays.asList(new Table.Cell("Saturday, 13 November 2010"), new Table.Cell("2")))));
     }
 
     @Test
     public void testWrite() throws Exception {
-        dataStorage.write(doc, xmp, Table.fromCSV(new InputStreamReader(getClass().getResourceAsStream("/data/2.csv"))));
+        dataStorage.write(doc, xmp, new Table(Arrays.asList("Day", "Lowest Temperature (C)"),
+                Collections.singletonList(
+                        Arrays.asList(new Table.Cell("Saturday, 13 November 2010"), new Table.Cell("2"))),
+                2, 1));
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XMPMetaFactory.serialize(xmp, out);

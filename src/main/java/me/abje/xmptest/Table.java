@@ -40,6 +40,10 @@ public class Table {
         }
     }
 
+    public List<String> getColumnNames() {
+        return columns;
+    }
+
     public int getWidth() {
         return width;
     }

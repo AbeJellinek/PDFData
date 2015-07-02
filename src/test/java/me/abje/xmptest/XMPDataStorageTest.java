@@ -5,6 +5,7 @@ import com.adobe.xmp.XMPMetaFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,6 +31,11 @@ public class XMPDataStorageTest {
             xmp = XMPMetaFactory.create();
         else
             xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        doc.close();
     }
 
     @Test
