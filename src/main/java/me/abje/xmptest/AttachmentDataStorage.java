@@ -2,8 +2,6 @@ package me.abje.xmptest;
 
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
@@ -45,11 +43,7 @@ public class AttachmentDataStorage extends DataStorage {
         PDComplexFileSpecification fs = new PDComplexFileSpecification();
         fs.setFile(UUID.randomUUID().toString());
 
-        StringBuilder builder = new StringBuilder();
-        CSVPrinter printer = CSVFormat.DEFAULT.print(builder);
-        printer.printRecords(table.getCells());
-
-        byte[] data = builder.toString().getBytes("UTF-8");
+        byte[] data = table.toCSV().getBytes("UTF-8");
 
         PDEmbeddedFile ef = new PDEmbeddedFile(doc, new ByteArrayInputStream(data));
         ef.setSize(data.length);

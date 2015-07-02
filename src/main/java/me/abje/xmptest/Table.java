@@ -3,6 +3,7 @@ package me.abje.xmptest;
 import com.google.common.collect.Lists;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.IOException;
@@ -48,6 +49,17 @@ public class Table {
 
     public List<List<Cell>> getCells() {
         return cells;
+    }
+
+    public String toCSV() {
+        StringBuilder builder = new StringBuilder();
+        try {
+            CSVPrinter printer = CSVFormat.DEFAULT.print(builder);
+            printer.printRecords(cells);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
     }
 
     @Override
