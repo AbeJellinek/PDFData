@@ -34,7 +34,7 @@ public class FormDataStorage extends DataStorage {
                 cells.add(new Table.Cell(""));
             }
         }
-        return new Table(columns, Collections.singletonList(cells), form.getFields().size(), cells.size());
+        return new Table(columns, Collections.singletonList(cells), columns.size(), cells.size());
     }
 
     @Override
