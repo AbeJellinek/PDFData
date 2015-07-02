@@ -30,7 +30,7 @@ public class AttachmentDataStorage extends DataStorage {
                     getEmbeddedFiles().getNames();
             String key = xmp.getPropertyString(SCHEMA_OD, PROP_FILENAME);
             PDComplexFileSpecification complexFile = (PDComplexFileSpecification) embeddedFiles.get(key);
-            return Table.fromCSV(new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString()));
+            return Table.fromCSV(new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString().trim()));
         } else {
             return null;
         }

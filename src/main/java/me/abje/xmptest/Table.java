@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Table {
+    private static final CSVFormat FORMAT = CSVFormat.EXCEL.withHeader();
     private List<String> columns;
     private List<List<Cell>> cells;
     private int width, height;
@@ -54,7 +55,7 @@ public class Table {
     public String toCSV() {
         StringBuilder builder = new StringBuilder();
         try {
-            CSVPrinter printer = CSVFormat.DEFAULT.print(builder);
+            CSVPrinter printer = FORMAT.withHeader(columns.toArray(new String[columns.size()])).print(builder);
             printer.printRecords(cells);
         } catch (IOException e) {
             e.printStackTrace();
@@ -89,14 +90,14 @@ public class Table {
     }
 
     public static Table fromCSV(Reader reader) throws IOException {
-        CSVParser parser = CSVFormat.DEFAULT.parse(reader);
+        CSVParser parser = FORMAT.parse(reader);
 
         List<String> headers = getHeaders(parser);
         List<List<Table.Cell>> cells = new ArrayList<>();
         int width = 0;
         int height = 0;
         for (CSVRecord record : parser) {
-            width++;
+            height++;
 
             List<Table.Cell> row = new ArrayList<>();
             int i = 0;
@@ -106,8 +107,8 @@ public class Table {
             }
             cells.add(row);
 
-            if (i > height)
-                height = i;
+            if (i > width)
+                width = i;
         }
 
         return new Table(headers, cells, width, height);

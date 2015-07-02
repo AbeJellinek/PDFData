@@ -2,17 +2,13 @@ package me.abje.xmptest;
 
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
-import com.google.common.io.ByteStreams;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.common.PDMetadata;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -48,5 +44,6 @@ public class AttachmentDataStorageTest {
         XMPMetaFactory.serialize(xmp, out);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         doc.getDocumentCatalog().setMetadata(new PDMetadata(doc, in, false));
+        doc.save(new File("src/test/resources/docs/2.pdf"));
     }
 }
