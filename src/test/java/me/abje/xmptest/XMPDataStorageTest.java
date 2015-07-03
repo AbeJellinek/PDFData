@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -49,7 +50,7 @@ public class XMPDataStorageTest {
 
     @Test
     public void testWrite() throws Exception {
-        dataStorage.write(doc, xmp, new Table(Arrays.asList("Temperature forecast for Galway, Ireland", ""),
+        dataStorage.write(doc, xmp, new Table(Arrays.asList("Day", "Lowest Temperature (C)"),
                 Arrays.asList(
                         Arrays.asList(new Table.Cell("Saturday, 13 November 2010"), new Table.Cell("2")),
                         Arrays.asList(new Table.Cell("Sunday, 14 November 2010"), new Table.Cell("4")),
@@ -60,6 +61,7 @@ public class XMPDataStorageTest {
         XMPMetaFactory.serialize(xmp, out);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         doc.getDocumentCatalog().setMetadata(new PDMetadata(doc, in, false));
+        doc.save(new File("src/test/resources/docs/1.pdf"));
 
         assertThat(xmp.getPropertyInteger(DataStorage.SCHEMA_OD, XMPDataStorage.PROP_ROW_SIZE), equalTo(2));
         assertThat(xmp.getArray(DataStorage.SCHEMA_OD, XMPDataStorage.PROP_DATA).toString(),
