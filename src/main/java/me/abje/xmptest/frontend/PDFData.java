@@ -4,7 +4,6 @@ import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import me.abje.xmptest.*;
-import org.apache.commons.cli.ParseException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 
@@ -40,7 +39,7 @@ public class PDFData {
         storage.write(doc, xmp, Table.fromCSV(new FileReader(sourceFile)));
     }
 
-    public static void main(String[] args) throws ParseException, IOException, XMPException {
+    public static void main(String[] args) throws IOException, XMPException {
         boolean isHelp = args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"));
         if (args.length == 0 || isHelp) {
             printHelpAndExit();
