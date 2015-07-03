@@ -11,6 +11,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
 
 public class PDFData {
     public Table read(DataStorage storage, File pdfFile) throws IOException, XMPException {
@@ -39,30 +43,38 @@ public class PDFData {
         storage.write(doc, xmp, Table.fromCSV(new FileReader(sourceFile)));
     }
 
-    public static void main(String[] args) throws IOException, XMPException {
-        boolean isHelp = args.length == 1 && (args[0].equals("-h") || args[0].equals("--help"));
-        if (args.length == 0 || isHelp) {
+    public static void main(String[] argsArray) throws IOException, XMPException {
+        List<String> args = new ArrayList<>(Arrays.asList(argsArray));
+        boolean isHelp = args.size() == 1 && (args.get(0).equals("-h") || args.get(0).equals("--help"));
+        boolean isOverwrite = false;
+
+        for (ListIterator<String> iterator = args.listIterator(); iterator.hasNext(); ) {
+            String arg = iterator.next();
+            if (arg.startsWith("-")) {
+                iterator.remove();
+                String option = arg.startsWith("--") ? arg.substring(2) : arg.substring(1);
+                if (option.equals("O") || option.equals("overwrite")) {
+                    isOverwrite = true;
+                } else {
+                    requireThat(false, "Invalid option.");
+                }
+            }
+        }
+
+        if (args.size() == 0 || isHelp) {
             printHelpAndExit();
-        } else if ((args.length == 3 || args.length == 4) && args[0].equals("read")) {
-            String typeName = args[1];
-            String pdfFileName = args[2];
+        } else if ((args.size() == 3 || args.size() == 4) && args.get(0).equals("read")) {
+            String typeName = args.get(1);
+            String pdfFileName = args.get(2);
 
             DataStorage storage = getStorage(typeName);
             File pdfFile = new File(pdfFileName);
-
-            if (!pdfFile.exists()) {
-                System.err.println("Error: PDF file doesn't exist.");
-                printHelpAndExit();
-            }
+            requireThat(pdfFile.exists(), "PDF file doesn't exist.");
 
             Table table = new PDFData().read(storage, pdfFile);
-            if (args.length == 4) {
-                File outFile = new File(args[3]);
-
-                if (outFile.exists()) {
-                    System.err.println("Error: Output file already exists.");
-                    printHelpAndExit();
-                }
+            if (args.size() == 4) {
+                File outFile = new File(args.get(3));
+                requireThat(isOverwrite || !outFile.exists(), "Output file already exists.");
 
                 FileWriter writer = new FileWriter(outFile);
                 writer.write(table.toCSV());
@@ -70,24 +82,17 @@ public class PDFData {
             } else {
                 System.out.print(table.toCSV());
             }
-        } else if (args.length == 4 && args[0].equals("write")) {
-            String typeName = args[1];
-            String sourceFileName = args[2];
-            String pdfFileName = args[3];
+        } else if (args.size() == 4 && args.get(0).equals("write")) {
+            String typeName = args.get(1);
+            String sourceFileName = args.get(2);
+            String pdfFileName = args.get(3);
 
             DataStorage storage = getStorage(typeName);
             File sourceFile = new File(sourceFileName);
             File pdfFile = new File(pdfFileName);
 
-            if (!sourceFile.exists()) {
-                System.err.println("Error: PDF file doesn't exist.");
-                printHelpAndExit();
-            }
-
-            if (!pdfFile.exists()) {
-                System.err.println("Error: PDF file doesn't exist.");
-                printHelpAndExit();
-            }
+            requireThat(sourceFile.exists(), "Source file doesn't exist.");
+            requireThat(pdfFile.exists(), "PDF file doesn't exist.");
 
             new PDFData().write(storage, sourceFile, pdfFile);
         } else {
@@ -95,10 +100,28 @@ public class PDFData {
         }
     }
 
+    private static void requireThat(boolean condition, String error) {
+        if (!condition) {
+            System.err.println("Error: " + error);
+            printHelpAndExit();
+        }
+    }
+
     private static void printHelpAndExit() {
+        // I'm really not sure of how this should be formatted, but it's fine for now.
+
         System.out.println("Usage: pdfdata\n" +
-                "    read  <type> <file> [outfile]\n" +
-                "    write <type> <source> <file>");
+                "    read  <storage type> <pdf file> [output file]\n" +
+                "    write <storage type> <source file> <pdf file>\n\n" +
+
+                "Options:\n" +
+                "    -O, --overwrite: overwrite the output file if it exists\n\n" +
+
+                "Storage Types:\n" +
+                "    annotations, ann, an: Annotation-based\n" +
+                "    attachments, att, at: Attachment-based\n" +
+                "    forms, form, f:       Form-based\n" +
+                "    xmp, meta, x, m:      Metadata-based");
         System.exit(1);
     }
 
