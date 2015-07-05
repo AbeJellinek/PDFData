@@ -4,6 +4,9 @@ import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import me.abje.xmptest.*;
+import me.abje.xmptest.frontend.opt.CommandParser;
+import me.abje.xmptest.frontend.opt.Options;
+import me.abje.xmptest.frontend.opt.ParseException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 
@@ -11,10 +14,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
 
 public class PDFData {
     public Table read(DataStorage storage, File pdfFile) throws IOException, XMPException {
@@ -44,37 +43,35 @@ public class PDFData {
     }
 
     public static void main(String[] argsArray) throws IOException, XMPException {
-        List<String> args = new ArrayList<>(Arrays.asList(argsArray));
-        boolean isHelp = args.size() == 1 && (args.get(0).equals("-h") || args.get(0).equals("--help"));
-        boolean isOverwrite = false;
+        CommandParser parser = new CommandParser();
+        parser.option("help")
+                .shortArg("h");
+        parser.option("overwrite")
+                .shortArg("O");
 
-        for (ListIterator<String> iterator = args.listIterator(); iterator.hasNext(); ) {
-            String arg = iterator.next();
-            if (arg.startsWith("-")) {
-                iterator.remove();
-                String option = arg.startsWith("--") ? arg.substring(2) : arg.substring(1);
-                if (option.equals("O") || option.equals("overwrite")) {
-                    isOverwrite = true;
-                } else {
-                    requireThat(false, "Invalid option.");
-                }
-            }
+        Options options;
+        try {
+            options = parser.parse(argsArray);
+        } catch (ParseException e) {
+            requireThat(false, e.getMessage());
+            options = new Options(null, null);
         }
 
-        if (args.size() == 0 || isHelp) {
+        String[] args = options.getArgs();
+        if (args.length == 0 || options.is("help")) {
             printHelpAndExit();
-        } else if ((args.size() == 3 || args.size() == 4) && args.get(0).equals("read")) {
-            String typeName = args.get(1);
-            String pdfFileName = args.get(2);
+        } else if ((args.length == 3 || args.length == 4) && args[0].equals("read")) {
+            String typeName = args[1];
+            String pdfFileName = args[2];
 
             DataStorage storage = getStorage(typeName);
             File pdfFile = new File(pdfFileName);
             requireThat(pdfFile.exists(), "PDF file doesn't exist.");
 
             Table table = new PDFData().read(storage, pdfFile);
-            if (args.size() == 4) {
-                File outFile = new File(args.get(3));
-                requireThat(isOverwrite || !outFile.exists(), "Output file already exists.");
+            if (args.length == 4) {
+                File outFile = new File(args[3]);
+                requireThat(options.is("overwrite") || !outFile.exists(), "Output file already exists.");
 
                 FileWriter writer = new FileWriter(outFile);
                 writer.write(table.toCSV());
@@ -82,10 +79,10 @@ public class PDFData {
             } else {
                 System.out.print(table.toCSV());
             }
-        } else if (args.size() == 4 && args.get(0).equals("write")) {
-            String typeName = args.get(1);
-            String sourceFileName = args.get(2);
-            String pdfFileName = args.get(3);
+        } else if (args.length == 4 && args[0].equals("write")) {
+            String typeName = args[1];
+            String sourceFileName = args[2];
+            String pdfFileName = args[3];
 
             DataStorage storage = getStorage(typeName);
             File sourceFile = new File(sourceFileName);
@@ -102,7 +99,7 @@ public class PDFData {
 
     private static void requireThat(boolean condition, String error) {
         if (!condition) {
-            System.err.println("Error: " + error);
+            System.err.println("Error: " + error + "\n");
             printHelpAndExit();
         }
     }
@@ -115,6 +112,7 @@ public class PDFData {
                 "    write <storage type> <source file> <pdf file>\n\n" +
 
                 "Options:\n" +
+                "    -h, --help:      print this help message and exit\n" +
                 "    -O, --overwrite: overwrite the output file if it exists\n\n" +
 
                 "Storage Types:\n" +
