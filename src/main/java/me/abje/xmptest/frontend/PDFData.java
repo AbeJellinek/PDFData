@@ -54,7 +54,7 @@ public class PDFData {
             options = parser.parse(argsArray);
         } catch (ParseException e) {
             requireThat(false, e.getMessage());
-            options = new Options(null, null);
+            return;
         }
 
         String[] args = options.getArgs();
