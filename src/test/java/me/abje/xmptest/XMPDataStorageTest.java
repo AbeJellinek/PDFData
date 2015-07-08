@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -61,7 +60,6 @@ public class XMPDataStorageTest {
         XMPMetaFactory.serialize(xmp, out);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         doc.getDocumentCatalog().setMetadata(new PDMetadata(doc, in, false));
-        doc.save(new File("src/test/resources/docs/1.pdf"));
 
         assertThat(xmp.getPropertyInteger(DataStorage.SCHEMA_OD, XMPDataStorage.PROP_ROW_SIZE), equalTo(2));
         assertThat(xmp.getArray(DataStorage.SCHEMA_OD, XMPDataStorage.PROP_DATA).toString(),

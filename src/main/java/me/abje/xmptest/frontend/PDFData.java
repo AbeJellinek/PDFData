@@ -4,9 +4,7 @@ import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import me.abje.xmptest.*;
-import me.abje.xmptest.frontend.opt.CommandParser;
-import me.abje.xmptest.frontend.opt.Options;
-import me.abje.xmptest.frontend.opt.ParseException;
+import me.abje.xmptest.frontend.opt.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 
@@ -49,6 +47,23 @@ public class PDFData {
         parser.option("overwrite")
                 .shortArg("O");
 
+        Choice<DataStorage> dataStorageChoice = Choice.<DataStorage>builder()
+                .option(new AnnotationDataStorage(), "annotations", "ann", "an")
+                .option(new AttachmentDataStorage(), "attachments", "att", "at")
+                .option(new FormDataStorage(), "forms", "form", "f")
+                .option(new XMPDataStorage(), "xmp", "meta", "x", "m")
+                .build();
+
+        parser.form("read")
+                .arg("storage type").choice(dataStorageChoice)
+                .arg("pdf file")
+                .arg("output file").optional();
+
+        parser.form("write")
+                .arg("storage type").choice(dataStorageChoice)
+                .arg("source file")
+                .arg("pdf file");
+
         Options options;
         try {
             options = parser.parse(argsArray);
@@ -57,20 +72,20 @@ public class PDFData {
             return;
         }
 
-        String[] args = options.getArgs();
-        if (args.length == 0 || options.is("help")) {
-            printHelpAndExit();
-        } else if ((args.length == 3 || args.length == 4) && args[0].equals("read")) {
-            String typeName = args[1];
-            String pdfFileName = args[2];
+        Form form = options.getForm();
 
-            DataStorage storage = getStorage(typeName);
+        if (form == null || options.is("help")) {
+            printHelpAndExit();
+        } else if (form.is("read")) {
+            String pdfFileName = options.get("pdf file");
+
+            DataStorage storage = dataStorageChoice.get(options);
             File pdfFile = new File(pdfFileName);
             requireThat(pdfFile.exists(), "PDF file doesn't exist.");
 
             Table table = new PDFData().read(storage, pdfFile);
-            if (args.length == 4) {
-                File outFile = new File(args[3]);
+            if (options.formHas("output file")) {
+                File outFile = new File(options.get("output file"));
                 requireThat(options.is("overwrite") || !outFile.exists(), "Output file already exists.");
 
                 FileWriter writer = new FileWriter(outFile);
@@ -79,12 +94,11 @@ public class PDFData {
             } else {
                 System.out.print(table.toCSV());
             }
-        } else if (args.length == 4 && args[0].equals("write")) {
-            String typeName = args[1];
-            String sourceFileName = args[2];
-            String pdfFileName = args[3];
+        } else if (form.is("write")) {
+            String sourceFileName = options.get("source file");
+            String pdfFileName = options.get("pdf file");
 
-            DataStorage storage = getStorage(typeName);
+            DataStorage storage = dataStorageChoice.get(options);
             File sourceFile = new File(sourceFileName);
             File pdfFile = new File(pdfFileName);
 
@@ -121,30 +135,5 @@ public class PDFData {
                 "    forms, form, f:       Form-based\n" +
                 "    xmp, meta, x, m:      Metadata-based");
         System.exit(1);
-    }
-
-    private static DataStorage getStorage(String typeName) {
-        switch (typeName) {
-            case "annotations":
-            case "ann":
-            case "an":
-                return new AnnotationDataStorage();
-            case "attachments":
-            case "att":
-            case "at":
-                return new AttachmentDataStorage();
-            case "forms":
-            case "form":
-            case "f":
-                return new FormDataStorage();
-            case "xmp":
-            case "meta":
-            case "x":
-            case "m":
-                return new XMPDataStorage();
-            default:
-                printHelpAndExit();
-                return null; // Never reached, since printHelpAndExit() exits.
-        }
     }
 }
