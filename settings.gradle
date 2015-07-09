@@ -1,2 +1,3 @@
 rootProject.name = 'xmptest'
 
+include 'od-reader', 'od-frontend', 'xmpcore'
