@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 public class CommandParser {
     private List<Option> options;
     private List<Form> forms;
+    private boolean allowOptions = true;
 
     public CommandParser() {
         this.options = new ArrayList<>();
@@ -21,30 +22,41 @@ public class CommandParser {
     }
 
     public Options parse(String[] argsArray) {
+        allowOptions = true;
+
         List<String> rawArgs = Arrays.asList(argsArray);
         Map<Option, List<String>> optionsMap = new HashMap<>();
         List<String> args = rawArgs.stream().filter(arg -> {
-            if (arg.startsWith("--")) {
-                String argName = arg.substring(2);
-                for (Option option : options) {
-                    if (argName.equals(option.getLongArg())) {
-                        optionsMap.put(option, Collections.emptyList());
+            if (allowOptions) {
+                if (arg.startsWith("--")) {
+                    String argName = arg.substring(2);
+                    if (argName.isEmpty()) {
+                        allowOptions = false;
                         return false;
-                    }
-                }
-                throw new ParseException("Unknown option: --" + argName);
-            } else if (arg.startsWith("-")) {
-                String argName = arg.substring(1);
-                for (Option option : options) {
-                    if (argName.startsWith(option.getShortArg())) {
-                        optionsMap.put(option, Collections.emptyList());
-                        argName = argName.substring(option.getShortArg().length());
-                        if (argName.isEmpty()) {
-                            return false;
+                    } else {
+                        for (Option option : options) {
+                            if (argName.equals(option.getLongArg())) {
+                                optionsMap.put(option, Collections.emptyList());
+                                return false;
+                            }
                         }
                     }
+                    throw new ParseException("Unknown option: --" + argName);
+                } else if (arg.startsWith("-")) {
+                    String argName = arg.substring(1);
+                    for (Option option : options) {
+                        if (argName.startsWith(option.getShortArg())) {
+                            optionsMap.put(option, Collections.emptyList());
+                            argName = argName.substring(option.getShortArg().length());
+                            if (argName.isEmpty()) {
+                                return false;
+                            }
+                        }
+                    }
+                    throw new ParseException("Unknown option: -" + argName);
+                } else {
+                    return true;
                 }
-                throw new ParseException("Unknown option: -" + argName);
             } else {
                 return true;
             }
