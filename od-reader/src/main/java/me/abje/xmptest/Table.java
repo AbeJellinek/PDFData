@@ -11,6 +11,9 @@ import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A set of tabular data with optional column headings.
+ */
 public class Table {
     private static final CSVFormat FORMAT = CSVFormat.EXCEL.withHeader();
     private List<String> columns;

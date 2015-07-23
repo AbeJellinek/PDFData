@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An annotation-based data storage method. Data is stored as PDF annotations.
+ * Writing is not yet supported.
+ */
 public class AnnotationDataStorage extends DataStorage {
     @Override
     public Table read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {

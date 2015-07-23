@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * A parsed set of command-line options.
+ */
 public class Options {
     private Form form;
     private Map<String, Object> formArgs;
