@@ -2,6 +2,7 @@ package me.abje.xmptest;
 
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
+import com.google.common.collect.Lists;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
@@ -17,13 +18,17 @@ import java.util.List;
  */
 public class AnnotationDataStorage extends DataStorage {
     @Override
-    public Table read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
+    public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         List<String> columns = Collections.singletonList("Annotation");
         List<List<Table.Cell>> cells = new ArrayList<>();
         // Really. Generics.
         @SuppressWarnings("unchecked") List<PDPage> pages = doc.getDocumentCatalog().getAllPages();
 
+        boolean hasAnnotations = false;
         for (PDPage page : pages) {
+            if (!hasAnnotations && !page.getAnnotations().isEmpty())
+                hasAnnotations = true;
+
             for (PDAnnotation annotation : page.getAnnotations()) {
                 if (annotation.getContents() == null)
                     continue;
@@ -31,7 +36,9 @@ public class AnnotationDataStorage extends DataStorage {
             }
         }
 
-        return new Table(columns, cells, columns.size(), cells.size());
+        if (!hasAnnotations)
+            return new ArrayList<>();
+        return Lists.newArrayList(new Table(columns, cells, columns.size(), cells.size()));
     }
 
     /**

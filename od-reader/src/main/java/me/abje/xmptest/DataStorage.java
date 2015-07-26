@@ -6,6 +6,7 @@ import com.adobe.xmp.XMPMetaFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * The common superclass for all data storage methods.
@@ -30,7 +31,7 @@ public abstract class DataStorage {
      * @return The stored triples.
      * @throws XMPException If an XMP error occurs.
      */
-    public abstract Table read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException;
+    public abstract List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException;
 
     /**
      * Writes a list of triples to the given document.

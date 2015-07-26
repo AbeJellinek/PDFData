@@ -2,6 +2,7 @@ package me.abje.xmptest;
 
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
+import com.google.common.collect.Lists;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
@@ -13,10 +14,10 @@ import java.util.List;
 
 public class FormDataStorage extends DataStorage {
     @Override
-    public Table read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
+    public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         PDAcroForm form = doc.getDocumentCatalog().getAcroForm();
-        if (form == null)
-            return null;
+        if (form == null || form.getFields().isEmpty())
+            return new ArrayList<>();
 
         List<String> columns = new ArrayList<>();
         List<Table.Cell> cells = new ArrayList<>();
@@ -34,7 +35,7 @@ public class FormDataStorage extends DataStorage {
                 cells.add(new Table.Cell(""));
             }
         }
-        return new Table(columns, Collections.singletonList(cells), columns.size(), cells.size());
+        return Lists.newArrayList(new Table(columns, Collections.singletonList(cells), columns.size(), cells.size()));
     }
 
     @Override

@@ -3,6 +3,7 @@ package me.abje.xmptest.frontend;
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
+import com.google.common.io.Files;
 import me.abje.xmptest.*;
 import me.abje.xmptest.frontend.opt.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -12,9 +13,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PDFData {
-    public Table read(DataStorage storage, File pdfFile) throws IOException, XMPException {
+    public List<Table> read(DataStorage storage, File pdfFile) throws IOException, XMPException {
         PDDocument doc = PDDocument.load(pdfFile);
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         XMPMeta xmp;
@@ -25,6 +28,14 @@ public class PDFData {
         }
 
         return storage.read(doc, xmp);
+    }
+
+    public List<Table> readAll(File pdfFile) throws IOException, XMPException {
+        List<Table> tables = new ArrayList<>();
+        tables.addAll(read(new AnnotationDataStorage(), pdfFile));
+        tables.addAll(read(new AttachmentDataStorage(), pdfFile));
+        tables.addAll(read(new FormDataStorage(), pdfFile));
+        return tables;
     }
 
     public void write(DataStorage storage, File sourceFile, File pdfFile) throws IOException, XMPException {
@@ -51,11 +62,9 @@ public class PDFData {
                 .option(new AnnotationDataStorage(), "annotations", "ann", "an")
                 .option(new AttachmentDataStorage(), "attachments", "att", "at")
                 .option(new FormDataStorage(), "forms", "form", "f")
-                .option(new XMPDataStorage(), "xmp", "meta", "x", "m")
                 .build();
 
         parser.form("read")
-                .arg("storage type").choice(dataStorageChoice)
                 .arg("pdf file")
                 .arg("output file").optional();
 
@@ -79,20 +88,31 @@ public class PDFData {
         } else if (form.is("read")) {
             String pdfFileName = options.get("pdf file");
 
-            DataStorage storage = dataStorageChoice.get(options);
             File pdfFile = new File(pdfFileName);
             requireThat(pdfFile.exists(), "PDF file doesn't exist.");
 
-            Table table = new PDFData().read(storage, pdfFile);
-            if (options.formHas("output file")) {
-                File outFile = new File(options.get("output file"));
-                requireThat(options.is("overwrite") || !outFile.exists(), "Output file already exists.");
+            PDFData pdfData = new PDFData();
+            List<Table> tables = pdfData.readAll(pdfFile);
 
-                FileWriter writer = new FileWriter(outFile);
-                writer.write(table.toCSV());
-                writer.close();
+            if (options.formHas("output file")) {
+                String baseFile = options.get("output file");
+                String name = Files.getNameWithoutExtension(baseFile);
+                String extension = Files.getFileExtension(baseFile);
+                for (int i = 0; i < tables.size(); i++) {
+                    Table table = tables.get(i);
+                    File outFile = new File(new File(baseFile).getParent(),
+                            name + (tables.size() > 1 ? ("_" + i + ".") : ".") + extension);
+                    requireThat(options.is("overwrite") || !outFile.exists(),
+                            "Output file `" + outFile.getPath() + "` already exists.");
+
+                    FileWriter writer = new FileWriter(outFile);
+                    writer.write(table.toCSV());
+                    writer.close();
+                }
             } else {
-                System.out.print(table.toCSV());
+                for (Table table : tables) {
+                    System.out.println(table.toCSV());
+                }
             }
         } else if (form.is("write")) {
             String sourceFileName = options.get("source file");
@@ -122,7 +142,7 @@ public class PDFData {
         // I'm really not sure of how this should be formatted, but it's fine for now.
 
         System.out.println("Usage: pdfdata\n" +
-                "    read  <storage type> <pdf file> [output file]\n" +
+                "    read  <pdf file> [output file]\n" +
                 "    write <storage type> <source file> <pdf file>\n\n" +
 
                 "Options:\n" +
@@ -132,8 +152,7 @@ public class PDFData {
                 "Storage Types:\n" +
                 "    annotations, ann, an: Annotation-based\n" +
                 "    attachments, att, at: Attachment-based\n" +
-                "    forms, form, f:       Form-based\n" +
-                "    xmp, meta, x, m:      Metadata-based");
+                "    forms, form, f:       Form-based\n");
         System.exit(1);
     }
 }

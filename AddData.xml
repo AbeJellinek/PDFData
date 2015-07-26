@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Commands>
+	<Command name="JavaScript" pauseBefore="false" promptUser="false" label="Add Data" tooltip="Add data to the document" ID="9D61568E53469554068D1E305DE0500">
+		<Items>
+			<Item name="ScriptCode" type="text" value="var uuid = &apos;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&apos;.replace(/[xy]/g, function(c) {&#xD;&#xA;    var r = Math.random()*16|0, v = c == &apos;x&apos; ? r : (r&amp;0x3|0x8);&#xD;&#xA;    return v.toString(16);&#xD;&#xA;});&#xD;&#xA;&#xD;&#xA;this.importDataObject(&quot;META_&quot; + uuid);"/>
+			<Item name="ScriptName" type="text" value=""/>
+		</Items>
+	</Command>
+</Commands>
