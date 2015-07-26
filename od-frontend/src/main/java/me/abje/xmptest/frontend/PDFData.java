@@ -35,6 +35,7 @@ public class PDFData {
         tables.addAll(read(new AnnotationDataStorage(), pdfFile));
         tables.addAll(read(new AttachmentDataStorage(), pdfFile));
         tables.addAll(read(new FormDataStorage(), pdfFile));
+        tables.addAll(read(new XMPDataStorage(), pdfFile));
         return tables;
     }
 
@@ -62,6 +63,7 @@ public class PDFData {
                 .option(new AnnotationDataStorage(), "annotations", "ann", "an")
                 .option(new AttachmentDataStorage(), "attachments", "att", "at")
                 .option(new FormDataStorage(), "forms", "form", "f")
+                .option(new XMPDataStorage(), "xmp", "meta", "x", "m")
                 .build();
 
         parser.form("read")
@@ -152,7 +154,8 @@ public class PDFData {
                 "Storage Types:\n" +
                 "    annotations, ann, an: Annotation-based\n" +
                 "    attachments, att, at: Attachment-based\n" +
-                "    forms, form, f:       Form-based\n");
+                "    forms, form, f:       Form-based\n" +
+                "    xmp, meta, x, m:      Metadata-based\n");
         System.exit(1);
     }
 }
