@@ -24,8 +24,12 @@ public class XMPDataStorage extends DataStorage {
         if (xmp.getProperty(SCHEMA_OD, PROP_DATA) != null) {
             int rowSize = xmp.getPropertyInteger(SCHEMA_OD, PROP_ROW_SIZE);
             List<XMPProperty> items = xmp.getArray(SCHEMA_OD, PROP_DATA);
-            List<String> columns = xmp.getArray(SCHEMA_OD, PROP_COLUMNS).stream()
-                    .map(XMPProperty::getValue).collect(Collectors.toList());
+            List<XMPProperty> columnProperties = xmp.getArray(SCHEMA_OD, PROP_COLUMNS);
+
+            if (items == null || columnProperties == null)
+                return Lists.newArrayList();
+
+            List<String> columns = columnProperties.stream().map(XMPProperty::getValue).collect(Collectors.toList());
 
             List<List<Table.Cell>> cells = new ArrayList<>();
             List<Table.Cell> currentRow = new ArrayList<>();
@@ -44,7 +48,7 @@ public class XMPDataStorage extends DataStorage {
 
             return Lists.newArrayList(new Table(columns, cells, rowSize, cells.size()));
         } else {
-            return null;
+            return Lists.newArrayList();
         }
     }
 
