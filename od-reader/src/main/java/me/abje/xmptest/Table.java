@@ -130,6 +130,10 @@ public class Table {
         return entries.stream().map(Map.Entry::getKey).collect(Collectors.toList());
     }
 
+    /**
+     * A cell within the table. At the moment, this class is just a wrapper around a string, but it exists in order to
+     * facilitate adding typed cells in the future.
+     */
     public static class Cell {
         private String value;
 

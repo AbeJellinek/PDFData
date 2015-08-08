@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The PDF reader/writer command-line tool.
+ */
 public class PDFData {
     public List<Table> read(DataStorage storage, File pdfFile) throws IOException, XMPException {
         PDDocument doc = PDDocument.load(pdfFile);

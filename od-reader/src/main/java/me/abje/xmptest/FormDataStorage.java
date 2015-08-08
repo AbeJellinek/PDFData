@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An annotation-based data storage method. Data is stored in the PDF's form.
+ * In order to be written to, a PDF must already have a form present. This storage method will not create one.
+ */
 public class FormDataStorage extends DataStorage {
     @Override
     public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
