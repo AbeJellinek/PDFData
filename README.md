@@ -8,6 +8,7 @@ What are all these files?
 
 * `build/` and `.gradle` files are project configuration.
 * `.iml` files are IntelliJ IDEA module files.
+* `AddData.xml` is an Adobe Acrobat action for adding linked data.
 * `od-frontend/` contains the code for the command-line reader/writer interface.
 * `od-reader/` contains the code for the reader/writer itself.
 * `xmpcore/` contains the code for a modified version of Adobe's XMPCore library.
