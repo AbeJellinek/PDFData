@@ -10,7 +10,7 @@ files and discovered, using public, open source libraries, and staying within th
 To run the project outside of an IDE, `cd` into the project's root directory and run `./gradlew run`. 
 A help message should be printed. Additional arguments can be supplied after `run`.
 
-Note: Gradle may indicate a failure if you run without supplying any arguments.
+__Note:__ Gradle may indicate a failure if you run without supplying any arguments.
 This is simply because the program returns a non-zero exit code.
 
     Usage: pdfdata
