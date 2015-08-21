@@ -5,6 +5,10 @@ repositories {
     mavenCentral()
 }
 
+apply plugin: 'application'
+
+mainClassName = "me.abje.xmptest.frontend.PDFData"
+
 allprojects {
     repositories {
         mavenCentral()

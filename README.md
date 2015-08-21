@@ -1,11 +1,17 @@
 # XMPTest - putting data into, getting data out of PDF
 
-This project is a proof of concept exploring ways in which data can be added to, annotated, or otherwise stored in PDF files and discovered, using public, open source libraries, staying within the ISO 32000 standard.
+This project is a proof of concept exploring ways in which data can be added to, annotated, or otherwise stored in PDF
+files and discovered, using public, open source libraries, staying within the ISO 32000 standard.
 
 ## Running
-* 'od-reader/src/test/resources/docs' has 4 pdf files resulting
 
-((Should include instructions for running))
+`od-reader/src/test/resources/docs` contains four example PDF files, labeled based on the storage types they contain.
+
+To run the project outside of an IDE, `cd` into the project's root directory and run `./gradlew run`. 
+A help message should be printed. Additional arguments can be supplied after `run`.
+
+Note: Gradle may indicate a failure if you run without supplying any arguments.
+This is simply because the program returns a non-zero exit code.
 
 ## Project Structure
 
