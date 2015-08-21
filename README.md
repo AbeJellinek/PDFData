@@ -1,7 +1,7 @@
 # XMPTest - putting data into, getting data out of PDF
 
 This project is a proof of concept exploring ways in which data can be added to, annotated, or otherwise stored in PDF
-files and discovered, using public, open source libraries, staying within the ISO 32000 standard.
+files and discovered, using public, open source libraries, and staying within the ISO 32000 standard.
 
 ## Running
 
