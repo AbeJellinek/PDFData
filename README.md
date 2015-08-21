@@ -41,19 +41,19 @@ We should write up design decisions and issues (when this gets big, separate or 
 
 ## Running
 
-Usage: pdfdata
-    read  <pdf file> [output file]
-    write <storage type> <source file> <pdf file>
-
-Options:
-    -h, --help:      print this help message and exit
-    -O, --overwrite: overwrite the output file if it exists
-
-Storage Types:
-    annotations, ann, an: Annotation-based
-    attachments, att, at: Attachment-based
-    forms, form, f:       Form-based
-    xmp, meta, x, m:      Metadata-based
+    Usage: pdfdata
+        read  <pdf file> [output file]
+        write <storage type> <source file> <pdf file>
+    
+    Options:
+        -h, --help:      print this help message and exit
+        -O, --overwrite: overwrite the output file if it exists
+    
+    Storage Types:
+        annotations, ann, an: Annotation-based
+        attachments, att, at: Attachment-based
+        forms, form, f:       Form-based
+        xmp, meta, x, m:      Metadata-based
 
 ## What We're Producing
 * some tooling for making data-bearing PDFs
