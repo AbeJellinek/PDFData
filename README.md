@@ -13,6 +13,20 @@ A help message should be printed. Additional arguments can be supplied after `ru
 Note: Gradle may indicate a failure if you run without supplying any arguments.
 This is simply because the program returns a non-zero exit code.
 
+    Usage: pdfdata
+        read  <pdf file> [output file]
+        write <storage type> <source file> <pdf file>
+    
+    Options:
+        -h, --help:      print this help message and exit
+        -O, --overwrite: overwrite the output file if it exists
+    
+    Storage Types:
+        annotations, ann, an: Annotation-based
+        attachments, att, at: Attachment-based
+        forms, form, f:       Form-based
+        xmp, meta, x, m:      Metadata-based
+
 ## Project Structure
 
 What are all these files?
@@ -38,22 +52,6 @@ and set "Gradle JVM" to the right JVM. If the list is empty, go to File -> Proje
 add a new one. IntelliJ should find the right installation for you.
 
 We should write up design decisions and issues (when this gets big, separate or start using GitHub issues).
-
-## Running
-
-    Usage: pdfdata
-        read  <pdf file> [output file]
-        write <storage type> <source file> <pdf file>
-    
-    Options:
-        -h, --help:      print this help message and exit
-        -O, --overwrite: overwrite the output file if it exists
-    
-    Storage Types:
-        annotations, ann, an: Annotation-based
-        attachments, att, at: Attachment-based
-        forms, form, f:       Form-based
-        xmp, meta, x, m:      Metadata-based
 
 ## What We're Producing
 * some tooling for making data-bearing PDFs
