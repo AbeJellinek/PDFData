@@ -116,6 +116,7 @@ public class PDFData {
                 }
             } else {
                 for (Table table : tables) {
+                    System.out.println(table.getName() + ":");
                     System.out.println(table.toCSV());
                 }
             }

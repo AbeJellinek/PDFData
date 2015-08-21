@@ -16,11 +16,13 @@ import java.util.stream.Collectors;
  */
 public class Table {
     private static final CSVFormat FORMAT = CSVFormat.EXCEL.withHeader();
+    private String name;
     private List<String> columns;
     private List<List<Cell>> cells;
     private int width, height;
 
-    public Table(List<String> columns, List<List<Cell>> cells, int width, int height) {
+    public Table(String name, List<String> columns, List<List<Cell>> cells, int width, int height) {
+        this.name = name;
         this.columns = columns;
         this.cells = cells;
         this.width = width;
@@ -33,6 +35,14 @@ public class Table {
         } else {
             return null;
         }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getColumnName(int column) {
@@ -77,19 +87,21 @@ public class Table {
         Table table = (Table) o;
         return Objects.equals(width, table.width) &&
                 Objects.equals(height, table.height) &&
+                Objects.equals(name, table.name) &&
                 Objects.equals(columns, table.columns) &&
                 Objects.equals(cells, table.cells);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(columns, cells, width, height);
+        return Objects.hash(name, columns, cells, width, height);
     }
 
     @Override
     public String toString() {
         return "Table{" +
-                "columns=" + columns +
+                "name='" + name + '\'' +
+                ", columns=" + columns +
                 ", cells=" + cells +
                 ", width=" + width +
                 ", height=" + height +
@@ -118,7 +130,7 @@ public class Table {
                 width = i;
         }
 
-        return new Table(headers, cells, width, height);
+        return new Table("", headers, cells, width, height);
     }
 
     private static List<String> getHeaders(CSVParser parser) {

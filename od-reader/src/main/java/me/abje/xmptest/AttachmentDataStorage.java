@@ -21,9 +21,14 @@ public class AttachmentDataStorage extends DataStorage {
     @Override
     public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         List<Table> tables = new ArrayList<>();
-        Map<String, COSObjectable> embeddedFiles = doc.getDocumentCatalog().getNames().
-                getEmbeddedFiles().getNames();
-        for (Map.Entry<String, COSObjectable> entry : embeddedFiles.entrySet()) {
+        PDDocumentNameDictionary names = doc.getDocumentCatalog().getNames();
+        if (names == null)
+            return tables;
+        PDEmbeddedFilesNameTreeNode node = names.getEmbeddedFiles();
+        if (node == null)
+            return tables;
+        Map<String, COSObjectable> files = node.getNames();
+        for (Map.Entry<String, COSObjectable> entry : files.entrySet()) {
             if (!entry.getKey().startsWith("META_"))
                 continue;
             PDComplexFileSpecification complexFile = (PDComplexFileSpecification) entry.getValue();

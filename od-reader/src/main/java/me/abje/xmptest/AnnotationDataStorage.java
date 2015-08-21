@@ -26,19 +26,20 @@ public class AnnotationDataStorage extends DataStorage {
 
         boolean hasAnnotations = false;
         for (PDPage page : pages) {
-            if (!hasAnnotations && !page.getAnnotations().isEmpty())
-                hasAnnotations = true;
-
             for (PDAnnotation annotation : page.getAnnotations()) {
-                if (annotation.getContents() == null)
+                if (annotation.getContents() == null) {
                     continue;
+                } else if (!hasAnnotations) {
+                    hasAnnotations = true;
+                }
+
                 cells.add(Collections.singletonList(new Table.Cell(annotation.getContents())));
             }
         }
 
         if (!hasAnnotations)
             return new ArrayList<>();
-        return Lists.newArrayList(new Table(columns, cells, columns.size(), cells.size()));
+        return Lists.newArrayList(new Table("Annotations", columns, cells, columns.size(), cells.size()));
     }
 
     /**

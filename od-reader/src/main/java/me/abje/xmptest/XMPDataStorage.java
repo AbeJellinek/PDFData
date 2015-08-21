@@ -46,7 +46,7 @@ public class XMPDataStorage extends DataStorage {
                 }
             }
 
-            return Lists.newArrayList(new Table(columns, cells, rowSize, cells.size()));
+            return Lists.newArrayList(new Table("Metadata", columns, cells, rowSize, cells.size()));
         } else {
             return Lists.newArrayList();
         }
