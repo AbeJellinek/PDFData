@@ -1,8 +1,13 @@
-# XMPTest
+# XMPTest - putting data into, getting data out of PDF
 
-A little project to explore options for adding linked open data to PDF.
+This project is a proof of concept exploring ways in which data can be added to, annotated, or otherwise stored in PDF files and discovered, using public, open source libraries, staying within the ISO 32000 standard.
 
-## Structure
+## Running
+* 'od-reader/src/test/resources/docs' has 4 pdf files resulting
+
+((Should include instructions for running))
+
+## Project Structure
 
 What are all these files?
 
