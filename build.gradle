@@ -24,6 +24,7 @@ project(':od-reader') {
         compile 'org.apache.pdfbox:pdfbox:1.8.9'
         compile 'com.google.guava:guava:18.0'
         compile 'org.apache.commons:commons-csv:1.1'
+        compile 'com.fasterxml.jackson.core:jackson-databind:2.6.1'
         compile project(':xmpcore')
         testCompile group: 'junit', name: 'junit', version: '4.11'
     }

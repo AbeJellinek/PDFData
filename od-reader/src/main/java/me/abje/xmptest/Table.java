@@ -1,5 +1,7 @@
 package me.abje.xmptest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -80,6 +82,24 @@ public class Table {
         return builder.toString();
     }
 
+    public String toJSON(boolean prettyPrint) throws JsonProcessingException {
+        List<Map<String, String>> data = new ArrayList<>();
+        for (List<Cell> row : cells) {
+            Map<String, String> map = new HashMap<>();
+            for (int i = 0; i < row.size(); i++) {
+                Cell cell = row.get(i);
+                map.put(getColumnName(i), cell.getValue());
+            }
+            data.add(map);
+        }
+
+        if (prettyPrint) {
+            return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data);
+        } else {
+            return new ObjectMapper().writeValueAsString(data);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,7 +128,7 @@ public class Table {
                 '}';
     }
 
-    public static Table fromCSV(Reader reader) throws IOException {
+    public static Table fromCSV(String name, Reader reader) throws IOException {
         CSVParser parser = FORMAT.parse(reader);
 
         List<String> headers = getHeaders(parser);
@@ -130,7 +150,7 @@ public class Table {
                 width = i;
         }
 
-        return new Table("", headers, cells, width, height);
+        return new Table(name, headers, cells, width, height);
     }
 
     private static List<String> getHeaders(CSVParser parser) {

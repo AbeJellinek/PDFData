@@ -52,7 +52,7 @@ public class PDFData {
             xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
         }
 
-        storage.write(doc, xmp, Table.fromCSV(new FileReader(sourceFile)));
+        storage.write(doc, xmp, Table.fromCSV("File", new FileReader(sourceFile)));
     }
 
     public static void main(String[] argsArray) throws IOException, XMPException {
@@ -61,6 +61,7 @@ public class PDFData {
                 .shortArg("h");
         parser.option("overwrite")
                 .shortArg("O");
+        parser.option("csv");
 
         Choice<DataStorage> dataStorageChoice = Choice.<DataStorage>builder()
                 .option(new AnnotationDataStorage(), "annotations", "ann", "an")
@@ -111,13 +112,13 @@ public class PDFData {
                             "Output file `" + outFile.getPath() + "` already exists.");
 
                     FileWriter writer = new FileWriter(outFile);
-                    writer.write(table.toCSV());
+                    writer.write(options.is("csv") ? table.toCSV() : table.toJSON(false));
                     writer.close();
                 }
             } else {
                 for (Table table : tables) {
                     System.out.println(table.getName() + ":");
-                    System.out.println(table.toCSV());
+                    System.out.println(options.is("csv") ? table.toCSV() : table.toJSON(true));
                 }
             }
         } else if (form.is("write")) {

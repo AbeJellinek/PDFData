@@ -32,7 +32,7 @@ public class AttachmentDataStorage extends DataStorage {
             if (!entry.getKey().startsWith("META_"))
                 continue;
             PDComplexFileSpecification complexFile = (PDComplexFileSpecification) entry.getValue();
-            tables.add(Table.fromCSV(new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString().trim())));
+            tables.add(Table.fromCSV("Attachment", new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString().trim())));
         }
         return tables;
     }
