@@ -118,7 +118,7 @@ public class PDFData {
             } else {
                 for (Table table : tables) {
                     System.out.println(table.getName() + ":");
-                    System.out.println(options.is("csv") ? table.toCSV() : table.toFormat("JSON-LD"));
+                    System.out.println(options.is("csv") ? table.toCSV() : table.toFormat("Turtle"));
                 }
             }
         } else if (form.is("write")) {
