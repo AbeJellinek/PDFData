@@ -7,9 +7,11 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.jena.rdf.model.*;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,6 +100,27 @@ public class Table {
         } else {
             return new ObjectMapper().writeValueAsString(data);
         }
+    }
+
+    public String toFormat(String lang) {
+        Model model = ModelFactory.createDefaultModel();
+
+        List<RDFNode> nodes = new ArrayList<>();
+        for (List<Cell> rowList : cells) {
+            Resource row = model.createResource();
+            for (int i = 0; i < rowList.size(); i++) {
+                Cell cell = rowList.get(i);
+                row.addLiteral(model.createProperty(DataStorage.SCHEMA_OD, "_c" + i), cell.getValue());
+            }
+            nodes.add(row);
+        }
+
+        RDFList rows = model.createList(nodes.iterator());
+        model.createResource().addProperty(model.createProperty(DataStorage.SCHEMA_OD, "Data"), rows);
+
+        StringWriter writer = new StringWriter();
+        model.write(writer, lang);
+        return writer.toString();
     }
 
     @Override
