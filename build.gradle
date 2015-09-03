@@ -5,10 +5,6 @@ repositories {
     mavenCentral()
 }
 
-apply plugin: 'application'
-
-mainClassName = "me.abje.xmptest.frontend.PDFData"
-
 allprojects {
     repositories {
         mavenCentral()
@@ -32,6 +28,10 @@ project(':od-reader') {
 }
 
 project(':od-frontend') {
+    apply plugin: 'application'
+
+    mainClassName = "me.abje.xmptest.frontend.PDFData"
+
     dependencies {
         compile project(':od-reader')
     }

@@ -20,8 +20,7 @@ import java.util.List;
  * The PDF reader/writer command-line tool.
  */
 public class PDFData {
-    public List<Table> read(DataStorage storage, File pdfFile) throws IOException, XMPException {
-        PDDocument doc = PDDocument.load(pdfFile);
+    public List<Table> read(DataStorage storage, PDDocument doc) throws IOException, XMPException {
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         XMPMeta xmp;
         if (catalog.getMetadata() == null) {
@@ -34,11 +33,15 @@ public class PDFData {
     }
 
     public List<Table> readAll(File pdfFile) throws IOException, XMPException {
+        PDDocument doc = PDDocument.load(pdfFile);
         List<Table> tables = new ArrayList<>();
-        tables.addAll(read(new AnnotationDataStorage(), pdfFile));
-        tables.addAll(read(new AttachmentDataStorage(), pdfFile));
-        tables.addAll(read(new FormDataStorage(), pdfFile));
-        tables.addAll(read(new XMPDataStorage(), pdfFile));
+
+        tables.addAll(read(new AnnotationDataStorage(), doc));
+        tables.addAll(read(new AttachmentDataStorage(), doc));
+        tables.addAll(read(new FormDataStorage(), doc));
+        tables.addAll(read(new XMPDataStorage(), doc));
+
+        doc.close();
         return tables;
     }
 
