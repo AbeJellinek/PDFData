@@ -15,21 +15,24 @@ First, while the data associated with a document is thought of as being in the d
 
 Second, there are several places where information in a PDF file could be treated as data, all supported by the PDF standard (ISO 32000) although not by all PDF implementations. PDF implementations are growing, with native implementations in Chrome, IOS, Windows 10, Firefox via PDF.js.
 
-## Whats in the project?
+## What's in the project?
 
-Primarily this project consists of a Java library for:
+Primarily, this project consists of a Java library for:
 
-* adding data to PDF file, as an attachment. Converting from PDF annoatations. Modifying the XMP. 
-* Extracting data from PDF files, Enumerating all of the places where data could be stashed and streaming the results.
-* some examples of data-bearing PDF files
-* some tooling for extracting, manipulating, searching data-bearing PDF
-* some documentation
-* Open design and implementation issues
+* Adding data to PDF file, as an attachment; converting from PDF annotations; modifying the XMP. 
+* Extracting data from PDF files, enumerating all of the places where data could be stashed, and streaming the results.
+
+It also has:
+
+* Some examples of data-bearing PDF files.
+* Some tooling for extracting, manipulating, and searching data-bearing PDFs.
+* Some documentation.
+* Open design and implementation issues.
 
 
 ## Running
 
-There is a release.
+There is a release, available as a runnable JAR [here](https://github.com/Aiybe/xmptest/releases).
 
 `od-reader/src/test/resources/docs` contains four example PDF files, labeled based on the storage types they contain.
 
