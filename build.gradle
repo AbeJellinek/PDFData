@@ -36,3 +36,10 @@ project(':od-frontend') {
         compile project(':od-reader')
     }
 }
+
+project(':od-web') {
+    // main settings in child build.gradle
+    dependencies {
+        compile project(':od-reader')
+    }
+}
