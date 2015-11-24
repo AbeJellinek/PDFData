@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDFData - Read</title>
+</head>
+<body>
+
+{{#each tables}}
+
+<h2>{{name}}</h2>
+<table>
+    {{#if columnNames}}
+    <tr>
+        {{#each columnNames}}
+        <th>{{this}}</th>
+        {{/each}}
+    </tr>
+    {{/if}}
+
+    {{#each cells}}
+    <tr>
+        {{#each this}}
+        <td>{{this}}</td>
+        {{/each}}
+    </tr>
+    {{/each}}
+</table>
+
+{{/each}}
+
+</body>
+</html>

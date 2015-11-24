@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,8 +26,7 @@ public class WebController {
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    @ResponseBody
-    public String upload(@RequestParam("file") MultipartFile file) throws IOException, XMPException {
+    public String upload(@RequestParam("file") MultipartFile file, Model model) throws IOException, XMPException {
         InputStream in = file.getInputStream();
 
         PDDocument doc = PDDocument.load(in);
@@ -39,7 +39,8 @@ public class WebController {
 
         doc.close();
 
-        return tables.toString();
+        model.addAttribute("tables", tables);
+        return "readResults";
     }
 
     private List<Table> read(DataStorage storage, PDDocument doc) throws IOException, XMPException {
