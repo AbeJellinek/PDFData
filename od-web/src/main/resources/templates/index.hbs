@@ -3,15 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>PDFData</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/skeleton.css">
+    <link rel="stylesheet" href="/css/custom.css">
 </head>
 <body>
 
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file"><br>
-    <input type="submit">
+<div class="section main">
+    <div class="container">
+        <form id="form" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="file"><br>
+            <input type="submit" class="button-primary">
 
-    <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}">
-</form>
+            <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}">
+        </form>
+    </div>
+</div>
 
 </body>
 </html>
