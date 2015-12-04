@@ -6,6 +6,7 @@ import com.adobe.xmp.XMPMetaFactory;
 import com.google.common.io.Files;
 import me.abje.xmptest.*;
 import me.abje.xmptest.frontend.opt.*;
+import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 
@@ -45,7 +46,7 @@ public class PDFData {
         return tables;
     }
 
-    public void write(DataStorage storage, File sourceFile, File pdfFile) throws IOException, XMPException {
+    public void write(DataStorage storage, File sourceFile, File pdfFile) throws IOException, XMPException, COSVisitorException {
         PDDocument doc = PDDocument.load(pdfFile);
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         XMPMeta xmp;
@@ -56,9 +57,10 @@ public class PDFData {
         }
 
         storage.write(doc, xmp, Table.fromCSV("File", new FileReader(sourceFile)));
+        doc.save(pdfFile);
     }
 
-    public static void main(String[] argsArray) throws IOException, XMPException {
+    public static void main(String[] argsArray) throws IOException, XMPException, COSVisitorException {
         CommandParser parser = new CommandParser();
         parser.option("help")
                 .shortArg("h");
