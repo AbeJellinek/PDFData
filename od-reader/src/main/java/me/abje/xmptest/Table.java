@@ -84,17 +84,30 @@ public class Table {
         return builder.toString();
     }
 
-    public String toJSON(boolean prettyPrint) throws JsonProcessingException {
+    private static List<Map<String, String>> toJSONData(Table table) {
         List<Map<String, String>> data = new ArrayList<>();
-        for (List<Cell> row : cells) {
+        for (List<Cell> row : table.cells) {
             Map<String, String> map = new HashMap<>();
             for (int i = 0; i < row.size(); i++) {
                 Cell cell = row.get(i);
-                map.put(getColumnName(i), cell.getValue());
+                map.put(table.getColumnName(i), cell.getValue());
             }
             data.add(map);
         }
+        return data;
+    }
 
+    public String toJSON(boolean prettyPrint) throws JsonProcessingException {
+        List<Map<String, String>> data = toJSONData(this);
+        if (prettyPrint) {
+            return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data);
+        } else {
+            return new ObjectMapper().writeValueAsString(data);
+        }
+    }
+
+    public static String allToJSON(List<Table> tables, boolean prettyPrint) throws JsonProcessingException {
+        List<List<Map<String, String>>> data = tables.stream().map(Table::toJSONData).collect(Collectors.toList());
         if (prettyPrint) {
             return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data);
         } else {

@@ -44,9 +44,11 @@ public class WebController {
         return "readResults";
     }
 
-    @RequestMapping(value = "/read/url", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/read/url", method = RequestMethod.POST,
+            consumes = "application/json",
+            produces = "application/json")
     @ResponseBody
-    public List<Table> jsonReadUrl(@RequestBody ReadRequest read) throws IOException, XMPException {
+    public String jsonReadUrl(@RequestBody ReadRequest read) throws IOException, XMPException {
         InputStream in = new URL(read.getUrl()).openStream();
 
         PDDocument doc = PDDocument.load(in);
@@ -58,14 +60,36 @@ public class WebController {
         tables.addAll(read(new XMPDataStorage(), doc));
 
         doc.close();
+        in.close();
 
-        return tables;
+        return Table.allToJSON(tables, false);
     }
 
-    @RequestMapping(value = "/read/url", method = RequestMethod.POST, consumes = "application/x-www-form-urlencoded")
+    @RequestMapping(value = "/read/url", method = RequestMethod.POST,
+            consumes = "application/x-www-form-urlencoded",
+            produces = "application/json")
     @ResponseBody
-    public List<Table> formReadUrl(ReadRequest read) throws IOException, XMPException {
+    public String formReadUrl(ReadRequest read) throws IOException, XMPException {
         return jsonReadUrl(read);
+    }
+
+    @RequestMapping(value = "/read", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    public String readPost(@RequestParam("file") MultipartFile file) throws IOException, XMPException {
+        InputStream in = file.getInputStream();
+
+        PDDocument doc = PDDocument.load(in);
+        List<Table> tables = new ArrayList<>();
+
+        tables.addAll(read(new AnnotationDataStorage(), doc));
+        tables.addAll(read(new AttachmentDataStorage(), doc));
+        tables.addAll(read(new FormDataStorage(), doc));
+        tables.addAll(read(new XMPDataStorage(), doc));
+
+        doc.close();
+        in.close();
+
+        return Table.allToJSON(tables, false);
     }
 
     private List<Table> read(DataStorage storage, PDDocument doc) throws IOException, XMPException {
