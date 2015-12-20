@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -26,8 +27,9 @@ public class WebController {
         return "index";
     }
 
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public String upload(@RequestParam("file") MultipartFile file, Model model) throws IOException, XMPException {
+    @RequestMapping(value = "/upload", method = RequestMethod.POST, params = "type=table")
+    public String upload(@RequestParam("file") MultipartFile file,
+                         Model model) throws IOException, XMPException {
         InputStream in = file.getInputStream();
 
         PDDocument doc = PDDocument.load(in);
@@ -42,6 +44,55 @@ public class WebController {
 
         model.addAttribute("tables", tables);
         return "readResults";
+    }
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "text/csv", params = "type=csv")
+    @ResponseBody
+    public String uploadToCSV(@RequestParam("file") MultipartFile file,
+                              HttpServletResponse response) throws IOException, XMPException {
+        InputStream in = file.getInputStream();
+
+        PDDocument doc = PDDocument.load(in);
+        List<Table> tables = new ArrayList<>();
+
+        tables.addAll(read(new AnnotationDataStorage(), doc));
+        tables.addAll(read(new AttachmentDataStorage(), doc));
+        tables.addAll(read(new FormDataStorage(), doc));
+        tables.addAll(read(new XMPDataStorage(), doc));
+
+        doc.close();
+
+        StringBuilder sb = new StringBuilder();
+        for (Table table : tables) {
+            if (tables.size() != 1)
+                sb.append("# ---- ").append(table.getName()).append(" ----\n");
+            sb.append(table.toCSV());
+        }
+
+        response.setHeader("Content-Disposition", "attachment; filename=\"data.csv\"");
+
+        return sb.toString();
+    }
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "application/json", params = "type=json")
+    @ResponseBody
+    public String uploadToJSON(@RequestParam("file") MultipartFile file,
+                               HttpServletResponse response) throws IOException, XMPException {
+        InputStream in = file.getInputStream();
+
+        PDDocument doc = PDDocument.load(in);
+        List<Table> tables = new ArrayList<>();
+
+        tables.addAll(read(new AnnotationDataStorage(), doc));
+        tables.addAll(read(new AttachmentDataStorage(), doc));
+        tables.addAll(read(new FormDataStorage(), doc));
+        tables.addAll(read(new XMPDataStorage(), doc));
+
+        doc.close();
+
+        response.setHeader("Content-Disposition", "attachment; filename=\"data.json\"");
+
+        return Table.allToJSON(tables, false);
     }
 
     @RequestMapping(value = "/read/url", method = RequestMethod.POST,
