@@ -5,12 +5,13 @@
 
 .section.main .container {
     padding-top: 4rem;
+    padding-bottom: 1rem;
 
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
 
-    background-color: lightblue;
+    background-color: lightgoldenrodyellow;
 }
 
 .section.results .container {
