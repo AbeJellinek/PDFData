@@ -11,14 +11,9 @@
 
 <div class="section main">
     <div class="container">
-        <form id="form" action="/read/upload" method="post" enctype="multipart/form-data">
-            <select name="type">
-                <option value="table">View</option>
-                <option disabled>───────</option>
-                <option value="csv">Download CSV</option>
-                <option value="json">Download JSON</option>
-            </select>
-            <input type="file" name="file" id="file"><br>
+        <form id="form" action="/write/upload" method="post" enctype="multipart/form-data">
+            <label>PDF <input type="file" name="pdf" id="pdf"></label>
+            <label>Data <input type="file" name="data" id="data"></label>
             <input type="submit" class="button-primary">
         </form>
 

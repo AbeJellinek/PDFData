@@ -42,7 +42,8 @@ public class AttachmentDataStorage extends DataStorage {
         PDEmbeddedFilesNameTreeNode efTree = new PDEmbeddedFilesNameTreeNode();
 
         PDComplexFileSpecification fs = new PDComplexFileSpecification();
-        fs.setFile("META_" + UUID.randomUUID().toString());
+        fs.setFile(table.getName() + ".csv");
+        fs.setFileDescription("META_" + UUID.randomUUID().toString());
 
         byte[] data = table.toCSV().getBytes("UTF-8");
 
@@ -52,7 +53,7 @@ public class AttachmentDataStorage extends DataStorage {
         fs.setEmbeddedFile(ef);
 
         Map<String, COSObjectable> efMap = new HashMap<>();
-        efMap.put(fs.getFile(), fs);
+        efMap.put(fs.getFileDescription(), fs);
         efTree.setNames(efMap);
 
         PDDocumentNameDictionary names = new PDDocumentNameDictionary(doc.getDocumentCatalog());
