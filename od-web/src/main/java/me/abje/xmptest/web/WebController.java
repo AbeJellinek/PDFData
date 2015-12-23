@@ -6,6 +6,8 @@ import com.adobe.xmp.XMPMetaFactory;
 import me.abje.xmptest.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,11 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 public class WebController {
@@ -46,10 +51,10 @@ public class WebController {
         return "readResults";
     }
 
-    @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "text/csv", params = "type=csv")
+    @RequestMapping(value = "/upload", method = RequestMethod.POST, params = "type=csv")
     @ResponseBody
-    public String uploadToCSV(@RequestParam("file") MultipartFile file,
-                              HttpServletResponse response) throws IOException, XMPException {
+    public Resource uploadToCSV(@RequestParam("file") MultipartFile file,
+                                HttpServletResponse response) throws IOException, XMPException {
         InputStream in = file.getInputStream();
 
         PDDocument doc = PDDocument.load(in);
@@ -62,16 +67,26 @@ public class WebController {
 
         doc.close();
 
-        StringBuilder sb = new StringBuilder();
-        for (Table table : tables) {
-            if (tables.size() != 1)
-                sb.append("# ---- ").append(table.getName()).append(" ----\n");
-            sb.append(table.toCSV());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ZipOutputStream zip = new ZipOutputStream(out);
+
+        if (tables.size() > 1) {
+            for (Table table : tables) {
+                zip.putNextEntry(new ZipEntry(table.getName() + ".csv"));
+                zip.write(table.toCSV().getBytes("UTF-8"));
+                zip.closeEntry();
+            }
+
+            zip.close();
+
+            response.setHeader("Content-Type", "application/octet-stream");
+            response.setHeader("Content-Disposition", "attachment; filename=\"data.zip\"");
+            return new ByteArrayResource(out.toByteArray());
+        } else {
+            response.setHeader("Content-Type", "text/csv");
+            response.setHeader("Content-Disposition", "attachment; filename=\"data.csv\"");
+            return new ByteArrayResource(tables.get(0).toCSV().getBytes("UTF-8"));
         }
-
-        response.setHeader("Content-Disposition", "attachment; filename=\"data.csv\"");
-
-        return sb.toString();
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "application/json", params = "type=json")
