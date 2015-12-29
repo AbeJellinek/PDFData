@@ -36,15 +36,4 @@ public abstract class DataStorage {
      * @throws IOException  If an I/O error occurs. (Unlikely.)
      */
     public abstract List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException;
-
-    /**
-     * Writes a list of triples to the given document.
-     *
-     * @param doc  The document.
-     * @param xmp  The document's metadata. Can be modified to update it on disk.
-     * @param data The data to be stored.
-     * @throws XMPException If an XMP error occurs.
-     * @throws IOException  If an I/O error occurs. (Unlikely.)
-     */
-    public abstract void write(PDDocument doc, XMPMeta xmp, Table data) throws XMPException, IOException;
 }

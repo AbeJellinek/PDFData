@@ -5,9 +5,13 @@ import com.adobe.xmp.XMPMeta;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.COSObjectable;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationFileAttachment;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,7 +21,7 @@ import java.util.*;
 /**
  * An attachment-based data storage method. Data is stored as an attachment in the PDF file, and linked using XMP.
  */
-public class AttachmentDataStorage extends DataStorage {
+public class AttachmentDataStorage extends WritableDataStorage {
     @Override
     public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         List<Table> tables = new ArrayList<>();
@@ -38,34 +42,62 @@ public class AttachmentDataStorage extends DataStorage {
     }
 
     @Override
-    public void write(PDDocument doc, XMPMeta xmp, Table table) throws XMPException, IOException {
-        PDDocumentNameDictionary names = doc.getDocumentCatalog().getNames();
-        if (names == null)
-            names = new PDDocumentNameDictionary(doc.getDocumentCatalog());
+    public void write(PDDocument doc, XMPMeta xmp, Table table, int page) throws XMPException, IOException {
+        if (page != -1) { // if page is provided
+            PDComplexFileSpecification fs = new PDComplexFileSpecification();
+            fs.setFile(table.getName() + ".csv");
+            fs.setFileDescription("META_" + UUID.randomUUID().toString());
 
-        PDEmbeddedFilesNameTreeNode efTree = names.getEmbeddedFiles();
-        if (efTree == null)
-            efTree = new PDEmbeddedFilesNameTreeNode();
+            byte[] data = table.toCSV().getBytes("UTF-8");
 
-        PDComplexFileSpecification fs = new PDComplexFileSpecification();
-        fs.setFile(table.getName() + ".csv");
-        fs.setFileDescription("META_" + UUID.randomUUID().toString());
+            PDEmbeddedFile ef = new PDEmbeddedFile(doc, new ByteArrayInputStream(data));
+            ef.setSize(data.length);
+            ef.setCreationDate(new GregorianCalendar());
+            fs.setEmbeddedFile(ef);
 
-        byte[] data = table.toCSV().getBytes("UTF-8");
+            PDPage pdPage = (PDPage) doc.getDocumentCatalog().getAllPages().get(page);
+            PDAnnotationFileAttachment annotation = new PDAnnotationFileAttachment();
+            annotation.setFile(fs);
+            annotation.setPage(pdPage);
+            annotation.setAttachementName(PDAnnotationFileAttachment.ATTACHMENT_NAME_PAPERCLIP);
 
-        PDEmbeddedFile ef = new PDEmbeddedFile(doc, new ByteArrayInputStream(data));
-        ef.setSize(data.length);
-        ef.setCreationDate(new GregorianCalendar());
-        fs.setEmbeddedFile(ef);
+            PDRectangle rect = new PDRectangle();
+            rect.setLowerLeftX(5);
+            rect.setLowerLeftY(5);
+            rect.setUpperRightX(15);
+            rect.setUpperRightY(25);
+            annotation.setRectangle(rect);
 
-        Map<String, COSObjectable> efMap = intoMap(efTree.getNames());
-        efMap.put(fs.getFileDescription(), fs);
-        efTree.setNames(efMap);
+            List<PDAnnotation> annotations = pdPage.getAnnotations();
+            annotations.add(annotation);
+            pdPage.setAnnotations(annotations);
+        } else {
+            PDDocumentNameDictionary names = doc.getDocumentCatalog().getNames();
+            if (names == null)
+                names = new PDDocumentNameDictionary(doc.getDocumentCatalog());
 
-        names.setEmbeddedFiles(efTree);
-        doc.getDocumentCatalog().setNames(names);
+            PDEmbeddedFilesNameTreeNode efTree = names.getEmbeddedFiles();
+            if (efTree == null)
+                efTree = new PDEmbeddedFilesNameTreeNode();
 
+            PDComplexFileSpecification fs = new PDComplexFileSpecification();
+            fs.setFile(table.getName() + ".csv");
+            fs.setFileDescription("META_" + UUID.randomUUID().toString());
 
+            byte[] data = table.toCSV().getBytes("UTF-8");
+
+            PDEmbeddedFile ef = new PDEmbeddedFile(doc, new ByteArrayInputStream(data));
+            ef.setSize(data.length);
+            ef.setCreationDate(new GregorianCalendar());
+            fs.setEmbeddedFile(ef);
+
+            Map<String, COSObjectable> efMap = intoMap(efTree.getNames());
+            efMap.put(fs.getFileDescription(), fs);
+            efTree.setNames(efMap);
+
+            names.setEmbeddedFiles(efTree);
+            doc.getDocumentCatalog().setNames(names);
+        }
     }
 
     private <K, V> Map<K, V> intoMap(Map<K, V> firstMap) {

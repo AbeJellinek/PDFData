@@ -41,27 +41,4 @@ public class FormDataStorage extends DataStorage {
         }
         return Lists.newArrayList(new Table("Form", columns, Collections.singletonList(cells), columns.size(), cells.size()));
     }
-
-    @Override
-    public void write(PDDocument doc, XMPMeta xmp, Table data) throws IOException {
-        if (data.getHeight() != 1)
-            throw new RuntimeException("Too many rows in data.");
-
-        PDAcroForm form = doc.getDocumentCatalog().getAcroForm();
-        if (form == null) {
-            form = new PDAcroForm(doc);
-            doc.getDocumentCatalog().setAcroForm(form);
-        }
-
-        for (List<Table.Cell> row : data.getCells()) {
-            int i = 0;
-            for (Table.Cell cell : row) {
-                PDField field = form.getField(data.getColumnName(i));
-                if (field != null) {
-                    field.setValue(cell.getValue());
-                }
-                i++;
-            }
-        }
-    }
 }

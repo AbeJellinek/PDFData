@@ -5,7 +5,10 @@ import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import com.google.common.io.Files;
 import me.abje.xmptest.*;
-import me.abje.xmptest.frontend.opt.*;
+import me.abje.xmptest.frontend.opt.CommandParser;
+import me.abje.xmptest.frontend.opt.Form;
+import me.abje.xmptest.frontend.opt.Options;
+import me.abje.xmptest.frontend.opt.ParseException;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -46,7 +49,7 @@ public class PDFData {
         return tables;
     }
 
-    public void write(DataStorage storage, File sourceFile, File pdfFile) throws IOException, XMPException, COSVisitorException {
+    public void write(WritableDataStorage storage, File sourceFile, File pdfFile) throws IOException, XMPException, COSVisitorException {
         PDDocument doc = PDDocument.load(pdfFile);
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         XMPMeta xmp;
@@ -56,7 +59,7 @@ public class PDFData {
             xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
         }
 
-        storage.write(doc, xmp, Table.fromCSV("File", new FileReader(sourceFile)));
+        storage.write(doc, xmp, Table.fromCSV("File", new FileReader(sourceFile)), page);
         doc.save(pdfFile);
     }
 
@@ -68,19 +71,11 @@ public class PDFData {
                 .shortArg("O");
         parser.option("csv");
 
-        Choice<DataStorage> dataStorageChoice = Choice.<DataStorage>builder()
-                .option(new AnnotationDataStorage(), "annotations", "ann", "an")
-                .option(new AttachmentDataStorage(), "attachments", "att", "at")
-                .option(new FormDataStorage(), "forms", "form", "f")
-                .option(new XMPDataStorage(), "xmp", "meta", "x", "m")
-                .build();
-
         parser.form("read")
                 .arg("pdf file")
                 .arg("output file").optional();
 
         parser.form("write")
-                .arg("storage type").choice(dataStorageChoice)
                 .arg("source file")
                 .arg("pdf file");
 
@@ -130,7 +125,7 @@ public class PDFData {
             String sourceFileName = options.get("source file");
             String pdfFileName = options.get("pdf file");
 
-            DataStorage storage = dataStorageChoice.get(options);
+            WritableDataStorage storage = new AttachmentDataStorage();
             File sourceFile = new File(sourceFileName);
             File pdfFile = new File(pdfFileName);
 
@@ -155,17 +150,11 @@ public class PDFData {
 
         System.out.println("Usage: pdfdata\n" +
                 "    read  <pdf file> [output file]\n" +
-                "    write <storage type> <source file> <pdf file>\n\n" +
+                "    write <source file> <pdf file>\n\n" +
 
                 "Options:\n" +
                 "    -h, --help:      print this help message and exit\n" +
-                "    -O, --overwrite: overwrite the output file if it exists\n\n" +
-
-                "Storage Types:\n" +
-                "    annotations, ann, an: Annotation-based\n" +
-                "    attachments, att, at: Attachment-based\n" +
-                "    forms, form, f:       Form-based\n" +
-                "    xmp, meta, x, m:      Metadata-based\n");
+                "    -O, --overwrite: overwrite the output file if it exists\n");
         System.exit(1);
     }
 }

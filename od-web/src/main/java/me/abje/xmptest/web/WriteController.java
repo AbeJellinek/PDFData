@@ -4,8 +4,8 @@ import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import me.abje.xmptest.AttachmentDataStorage;
-import me.abje.xmptest.DataStorage;
 import me.abje.xmptest.Table;
+import me.abje.xmptest.WritableDataStorage;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Optional;
 
 @Controller
 public class WriteController {
@@ -30,15 +31,17 @@ public class WriteController {
     @ResponseBody
     public Resource upload(@RequestParam("pdf") MultipartFile pdf,
                            @RequestParam("data") MultipartFile data,
+                           @RequestParam("page") Optional<Integer> maybePage,
                            HttpServletResponse response) throws IOException, XMPException, COSVisitorException {
 
         InputStream pdfIn = pdf.getInputStream();
         PDDocument doc = PDDocument.load(pdfIn);
 
         InputStream dataIn = data.getInputStream();
+        int page = maybePage.orElse(0) - 1; // one-indexed in form, zero-indexed in file. -1 means none.
 
         write(new AttachmentDataStorage(), doc, Table.fromCSV(data.getOriginalFilename().replaceFirst("(.*)\\.csv$", "$1"),
-                new InputStreamReader(dataIn)));
+                new InputStreamReader(dataIn)), page);
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         doc.save(bytes);
@@ -50,7 +53,8 @@ public class WriteController {
         return new ByteArrayResource(bytes.toByteArray());
     }
 
-    private void write(DataStorage storage, PDDocument doc, Table table) throws IOException, XMPException {
+    private void write(WritableDataStorage storage, PDDocument doc, Table table, int page)
+            throws IOException, XMPException {
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         XMPMeta xmp;
         if (catalog.getMetadata() == null) {
@@ -59,7 +63,7 @@ public class WriteController {
             xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
         }
 
-        storage.write(doc, xmp, table);
+        storage.write(doc, xmp, table, page);
     }
 
 }

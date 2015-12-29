@@ -41,18 +41,4 @@ public class AnnotationDataStorage extends DataStorage {
             return new ArrayList<>();
         return Lists.newArrayList(new Table("Annotations", columns, cells, columns.size(), cells.size()));
     }
-
-    /**
-     * Throws an exception and exits.
-     *
-     * @param doc  The document.
-     * @param xmp  The document's metadata. Can be modified to update it on disk.
-     * @param data The data to be stored.
-     * @deprecated Annotation-based storage cannot yet be written. This method will throw an exception.
-     */
-    @Override
-    @Deprecated
-    public void write(PDDocument doc, XMPMeta xmp, Table data) {
-        throw new RuntimeException("Not yet implemented.");
-    }
 }
