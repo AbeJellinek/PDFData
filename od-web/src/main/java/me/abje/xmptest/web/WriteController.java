@@ -37,7 +37,7 @@ public class WriteController {
 
         InputStream dataIn = data.getInputStream();
 
-        write(new AttachmentDataStorage(), doc, Table.fromCSV(data.getName(),
+        write(new AttachmentDataStorage(), doc, Table.fromCSV(data.getOriginalFilename().replaceFirst("(.*)\\.csv$", "$1"),
                 new InputStreamReader(dataIn)));
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();

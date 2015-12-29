@@ -39,7 +39,13 @@ public class AttachmentDataStorage extends DataStorage {
 
     @Override
     public void write(PDDocument doc, XMPMeta xmp, Table table) throws XMPException, IOException {
-        PDEmbeddedFilesNameTreeNode efTree = new PDEmbeddedFilesNameTreeNode();
+        PDDocumentNameDictionary names = doc.getDocumentCatalog().getNames();
+        if (names == null)
+            names = new PDDocumentNameDictionary(doc.getDocumentCatalog());
+
+        PDEmbeddedFilesNameTreeNode efTree = names.getEmbeddedFiles();
+        if (efTree == null)
+            efTree = new PDEmbeddedFilesNameTreeNode();
 
         PDComplexFileSpecification fs = new PDComplexFileSpecification();
         fs.setFile(table.getName() + ".csv");
@@ -52,12 +58,21 @@ public class AttachmentDataStorage extends DataStorage {
         ef.setCreationDate(new GregorianCalendar());
         fs.setEmbeddedFile(ef);
 
-        Map<String, COSObjectable> efMap = new HashMap<>();
+        Map<String, COSObjectable> efMap = intoMap(efTree.getNames());
         efMap.put(fs.getFileDescription(), fs);
         efTree.setNames(efMap);
 
-        PDDocumentNameDictionary names = new PDDocumentNameDictionary(doc.getDocumentCatalog());
         names.setEmbeddedFiles(efTree);
         doc.getDocumentCatalog().setNames(names);
+
+
+    }
+
+    private <K, V> Map<K, V> intoMap(Map<K, V> firstMap) {
+        if (firstMap == null) {
+            return new HashMap<>();
+        } else {
+            return new HashMap<>(firstMap);
+        }
     }
 }
