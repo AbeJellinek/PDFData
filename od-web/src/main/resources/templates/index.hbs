@@ -50,14 +50,26 @@
         <div class="panel-body">
             <form id="form" class="form-horizontal" action="/read/upload" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="type" class="col-sm-1 control-label">Action</label>
+                    <label class="col-sm-1 control-label">Action</label>
                     <div class="col-sm-11">
-                        <select name="type" id="type" class="form-control">
-                            <option value="table">View</option>
-                            <option disabled>───────</option>
-                            <option value="csv">Download CSV</option>
-                            <option value="json">Download JSON</option>
-                        </select>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="type" value="table" checked>
+                                View
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="type" value="csv">
+                                Download CSV
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="type" value="json">
+                                Download JSON
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
