@@ -49,7 +49,7 @@ public class Table {
         this.name = name;
     }
 
-    public String getColumnName(int column) {
+    private String getColumnName(int column) {
         if (column >= 0 && column < columns.size()) {
             return columns.get(column);
         } else {

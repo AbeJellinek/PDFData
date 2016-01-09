@@ -22,6 +22,8 @@ import java.util.*;
  * An attachment-based data storage method. Data is stored as an attachment in the PDF file, and linked using XMP.
  */
 public class AttachmentDataStorage extends WritableDataStorage {
+    private static final String STORED_DATA = "Stored Data";
+
     @Override
     public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         List<Table> tables = new ArrayList<>();
@@ -38,6 +40,24 @@ public class AttachmentDataStorage extends WritableDataStorage {
             PDComplexFileSpecification complexFile = (PDComplexFileSpecification) entry.getValue();
             tables.add(Table.fromCSV("Attachment", new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString().trim())));
         }
+
+        int pageNum = 1;
+        //noinspection unchecked
+        for (PDPage page : (List<PDPage>) doc.getDocumentCatalog().getAllPages()) {
+            for (PDAnnotation annotation : page.getAnnotations()) {
+                if (annotation instanceof PDAnnotationFileAttachment) {
+                    PDAnnotationFileAttachment fileAttachment = (PDAnnotationFileAttachment) annotation;
+                    if (fileAttachment.getSubject().equals(STORED_DATA)) {
+                        PDComplexFileSpecification complexFile = (PDComplexFileSpecification) fileAttachment.getFile();
+                        tables.add(Table.fromCSV("Page " + pageNum + " Attachment",
+                                new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString().trim())));
+                    }
+                }
+            }
+
+            pageNum++;
+        }
+
         return tables;
     }
 
@@ -60,6 +80,7 @@ public class AttachmentDataStorage extends WritableDataStorage {
             annotation.setFile(fs);
             annotation.setPage(pdPage);
             annotation.setAttachementName(PDAnnotationFileAttachment.ATTACHMENT_NAME_PAPERCLIP);
+            annotation.setSubject(STORED_DATA);
 
             PDRectangle rect = new PDRectangle();
             rect.setLowerLeftX(5);
