@@ -14,4 +14,9 @@ public class WebController {
     public String write() {
         return "write";
     }
+
+    @RequestMapping("/setup")
+    public String setup() {
+        return "setup";
+    }
 }

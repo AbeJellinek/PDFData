@@ -32,9 +32,9 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/">Read</a></li>
+                <li><a href="/">Read</a></li>
                 <li><a href="/write">Write</a></li>
-                <li><a href="/setup">Setup</a></li>
+                <li class="active"><a href="/setup">Setup</a></li>
             </ul>
         </div>
     </div>
@@ -43,37 +43,48 @@
 <div class="container">
 
     <div>
-        <h1>PDFData Viewer</h1>
+        <h1>PDFData Setup</h1>
+        <p class="lead">Demo files and instructions for using the service.</p>
     </div>
 
     <div class="panel panel-default">
         <div class="panel-body">
-            {{#each tables}}
+            <h2>Demo Instructions</h2>
 
-            <h2>{{name}}</h2>
-            <table class="table">
-                {{#if columnNames}}
-                <thead>
-                <tr>
-                    {{#each columnNames}}
-                    <th>{{this}}</th>
-                    {{/each}}
-                </tr>
-                </thead>
-                {{/if}}
+            <p>
+            <ul>
+                <li>Show <a href="https://github.com/Aiybe/xmptest">GitHub project</a></li>
+                <li>Show <a href="/xmptool_example_data.zip">PDF files and data files</a></li>
+                <li>Create a data PDF with the <a href="/write">writer</a></li>
+                <li>Read that PDF with the <a href="/read">reader</a></li>
+            </ul>
+            </p>
 
-                <tbody>
-                {{#each cells}}
-                <tr>
-                    {{#each this}}
-                    <td>{{this}}</td>
-                    {{/each}}
-                </tr>
-                {{/each}}
-                </tbody>
-            </table>
+            <hr>
 
-            {{/each}}
+            <p>
+                <a href="/xmptool_example_data.zip" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-download"></span> Download Example Data
+                </a>
+            </p>
+
+            <p>
+                This is a set of example data for <a href="https://pdf.abe.im/">PDFData</a> to demonstrate
+                its reading and writing capabilities.
+            </p>
+
+            <p>
+                The included CSV file (<code>country_ranking.csv</code>) contains raw data from MIT's
+                <a href="http://atlas.media.mit.edu/en/">Observatory of Economic Complexity</a>, and the PDF file
+                (<code>country_ranking.pdf</code>) is a visual PDF containing embedded data in PDFData's format. You can
+                upload these files to the main reader/writer website to experiment with their contents. All used data is
+                licensed under the <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA license</a>, and
+                you should use it under the terms of that license.
+            </p>
+
+            <p>
+                Thanks for trying out PDFData!
+            </p>
         </div>
     </div>
 
