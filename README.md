@@ -33,6 +33,7 @@ It also has:
 ## Running
 
 There is a release, available as a runnable JAR [here](https://github.com/Aiybe/xmptest/releases).
+You can also try it out on the web [here](https://pdf.abe.im).
 
 `od-reader/src/test/resources/docs` contains four example PDF files, labeled based on the storage types they contain.
 
