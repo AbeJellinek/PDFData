@@ -57,6 +57,16 @@ This is simply because the program returns a non-zero exit code.
         forms, form, f:       Form-based
         xmp, meta, x, m:      Metadata-based
 
+## Hosting
+
+The web interface can easily be hosted on any server with a Java installation.
+
+To build a runnable JAR, `cd` into the root directory and run `./gradlew od-web:distZip`. This command will create a
+ZIP file with scripts inside to run on any platform. You can upload that ZIP to your server, or run it locally. No
+database configuration or configuration in general is required.
+
+When you run, a port can be specified with the `--server.port=` command-line option.
+
 ## Project Structure
 
 What are all these files?
