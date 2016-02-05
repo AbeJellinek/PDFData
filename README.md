@@ -1,6 +1,8 @@
-# XMPTest: putting data into, getting data out of PDF
+# XMPTool: putting data into, getting data out of PDF
 
 ## Background
+
+[View build instructions.](BUILD.md)
 
 There is a growing movement to encourage those who publish information on the web to publish not just documents but also machine-readable data in a format that is easy to digest. Further, there is a desire that the data be represented in a way that leverages the "semantic web" by insuring that the data uses URLs to identify vocabularies and linkages.
 
@@ -37,7 +39,7 @@ You can also try it out on the web [here](https://pdf.abe.im).
 
 `od-reader/src/test/resources/docs` contains four example PDF files, labeled based on the storage types they contain.
 
-To run the project outside of an IDE, `cd` into the project's root directory and run `./gradlew run`. 
+To run the project outside of an IDE, `cd` into the project's root directory and run `./gradlew run`.
 A help message should be printed. Additional arguments can be supplied after `run`.
 
 __Note:__ Gradle may indicate a failure if you run without supplying any arguments.
@@ -46,26 +48,16 @@ This is simply because the program returns a non-zero exit code.
     Usage: pdfdata
         read  <pdf file> [output file]
         write <storage type> <source file> <pdf file>
-    
+
     Options:
         -h, --help:      print this help message and exit
         -O, --overwrite: overwrite the output file if it exists
-    
+
     Storage Types:
         annotations, ann, an: Annotation-based
         attachments, att, at: Attachment-based
         forms, form, f:       Form-based
         xmp, meta, x, m:      Metadata-based
-
-## Hosting
-
-The web interface can easily be hosted on any server with a Java installation.
-
-To build a runnable JAR, `cd` into the root directory and run `./gradlew od-web:distZip`. This command will create a
-ZIP file with scripts inside to run on any platform. You can upload that ZIP to your server, or run it locally. No
-database configuration or configuration in general is required.
-
-When you run, a port can be specified with the `--server.port=` command-line option.
 
 ## Project Structure
 
@@ -79,15 +71,3 @@ What are all these files?
 * `xmpcore/` contains the code for a modified version of Adobe's XMPCore library.
 
 The actual source code is in the `src/` folder of each module.
-
-## Setting Up a Build Environment
-
-1. Make sure you have the JDK installed. We're using JDK 8, and the code will not build on older versions.
-2. Download IntelliJ IDEA. The Community Edition has absolutely everything we'll need for this project.
-3. Clone this repository.
-4. In IntelliJ, go to File -> Open... and choose the build.gradle file in the cloned directory.
-
-You may need in IntelliJ to go to Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle
-and set "Gradle JVM" to the right JVM. If the list is empty, go to File -> Project Structure -> SDKs and 
-add a new one. IntelliJ should find the right installation for you.
-
