@@ -100,7 +100,7 @@ public class ReadController {
 
         response.setHeader("Content-Disposition", "attachment; filename=\"data.json\"");
 
-        return Table.allToJSON(tables, false);
+        return Table.allToJSON(tables, true);
     }
 
     @RequestMapping(value = "/read/url", method = RequestMethod.POST,
@@ -121,7 +121,7 @@ public class ReadController {
         doc.close();
         in.close();
 
-        return Table.allToJSON(tables, false);
+        return Table.allToJSON(tables, true);
     }
 
     @RequestMapping(value = "/read/url", method = RequestMethod.POST,
@@ -148,7 +148,7 @@ public class ReadController {
         doc.close();
         in.close();
 
-        return Table.allToJSON(tables, false);
+        return Table.allToJSON(tables, true);
     }
 
     private List<Table> read(DataStorage storage, PDDocument doc) throws IOException, XMPException {
