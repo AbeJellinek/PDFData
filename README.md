@@ -26,6 +26,7 @@ Primarily, this project consists of a Java library for:
 
 It also has:
 
+* A server that hosts a web interface for demonstrating simple applications of the library.
 * Some examples of data-bearing PDF files.
 * Some tooling for extracting, manipulating, and searching data-bearing PDFs.
 * Some documentation.
@@ -58,16 +59,3 @@ This is simply because the program returns a non-zero exit code.
         attachments, att, at: Attachment-based
         forms, form, f:       Form-based
         xmp, meta, x, m:      Metadata-based
-
-## Project Structure
-
-What are all these files?
-
-* `build/` and `.gradle` files are project configuration.
-* `.iml` files are IntelliJ IDEA module files.
-* `AddData.xml` is an Adobe Acrobat action for adding linked data.
-* `od-frontend/` contains the code for the command-line reader/writer interface.
-* `od-reader/` contains the code for the reader/writer itself.
-* `xmpcore/` contains the code for a modified version of Adobe's XMPCore library.
-
-The actual source code is in the `src/` folder of each module.

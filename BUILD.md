@@ -11,7 +11,14 @@ You may need in IntelliJ to go to Preferences -> Build, Execution, Deployment ->
 and set "Gradle JVM" to the right JVM. If the list is empty, go to File -> Project Structure -> SDKs and
 add a new one. IntelliJ should find the right installation for you.
 
-## Hosting
+## Building the Tool
+
+*Needs more.*
+
+To build the tool itself, `cd` into the root directory and run `./gradlew od-frontend:jar`. If you only want to build
+the library, but not the frontend tool, use `od-reader:jar` instead.
+
+## Building/Hosting the Web Service
 
 The web interface can easily be hosted on any server with a Java installation.
 
@@ -20,3 +27,17 @@ ZIP file with scripts inside to run on any platform. You can upload that ZIP to 
 database configuration or configuration in general is required.
 
 When you run, a port can be specified with the `--server.port=` command-line option.
+
+## Project Structure
+
+What are all these files?
+
+* `build/` and `.gradle` files are project configuration.
+* `.iml` files are IntelliJ IDEA module files.
+* `AddData.xml` is an Adobe Acrobat action for adding linked data.
+* `od-frontend/` contains the code for the command-line reader/writer interface.
+* `od-reader/` contains the code for the reader/writer itself.
+* `od-web/` contains the code for the web service.
+* `xmpcore/` contains the code for a modified version of Adobe's XMPCore library.
+
+The actual source code is in the `src/` folder of each module.
