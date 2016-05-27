@@ -6,7 +6,6 @@ import com.adobe.xmp.XMPMetaFactory;
 import me.abje.xmptest.AttachmentDataStorage;
 import me.abje.xmptest.Table;
 import me.abje.xmptest.WritableDataStorage;
-import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.springframework.core.io.ByteArrayResource;
@@ -23,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Optional;
 
 @Controller
 public class WriteController {
@@ -31,14 +29,14 @@ public class WriteController {
     @ResponseBody
     public Resource upload(@RequestParam("pdf") MultipartFile pdf,
                            @RequestParam("data") MultipartFile data,
-                           @RequestParam("page") Optional<Integer> maybePage,
-                           HttpServletResponse response) throws IOException, XMPException, COSVisitorException {
+                           @RequestParam("page") Integer maybePage,
+                           HttpServletResponse response) throws IOException, XMPException {
 
         InputStream pdfIn = pdf.getInputStream();
         PDDocument doc = PDDocument.load(pdfIn);
 
         InputStream dataIn = data.getInputStream();
-        int page = maybePage.orElse(0) - 1; // one-indexed in form, zero-indexed in file. -1 means none.
+        int page = (maybePage == null ? 0 : maybePage) - 1; // one-indexed in form, zero-indexed in file. -1 means none.
 
         write(new AttachmentDataStorage(), doc, Table.fromCSV(data.getOriginalFilename().replaceFirst("(.*)\\.csv$", "$1"),
                 new InputStreamReader(dataIn)), page);
