@@ -29,7 +29,7 @@ public class FormDataStorage extends DataStorage {
             PDField field = (PDField) obj; // Generics... Use them.
             columns.add(field.getPartialName());
             try {
-                String value = field.getValue();
+                String value = field.getValueAsString();
                 cells.add(new Table.Cell(
                         value == null || value.equals("\u00fe\u00ff") ? "" : value));
                 // "\u00fe\u00ff" seems to be the null code for PDF form fields. Need to research.

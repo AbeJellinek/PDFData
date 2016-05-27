@@ -5,6 +5,7 @@ import com.adobe.xmp.XMPMeta;
 import com.google.common.collect.Lists;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 
 import java.io.IOException;
@@ -21,8 +22,7 @@ public class AnnotationDataStorage extends DataStorage {
     public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         List<String> columns = Collections.singletonList("Annotation");
         List<List<Table.Cell>> cells = new ArrayList<>();
-        // Really. Generics.
-        @SuppressWarnings("unchecked") List<PDPage> pages = doc.getDocumentCatalog().getAllPages();
+        PDPageTree pages = doc.getDocumentCatalog().getPages();
 
         boolean hasAnnotations = false;
         for (PDPage page : pages) {

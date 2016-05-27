@@ -6,7 +6,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.COSObjectable;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
@@ -33,24 +32,25 @@ public class AttachmentDataStorage extends WritableDataStorage {
         PDEmbeddedFilesNameTreeNode node = names.getEmbeddedFiles();
         if (node == null)
             return tables;
-        Map<String, COSObjectable> files = node.getNames();
-        for (Map.Entry<String, COSObjectable> entry : files.entrySet()) {
+        Map<String, PDComplexFileSpecification> files = node.getNames();
+        for (Map.Entry<String, PDComplexFileSpecification> entry : files.entrySet()) {
             if (!entry.getKey().startsWith("META_"))
                 continue;
-            PDComplexFileSpecification complexFile = (PDComplexFileSpecification) entry.getValue();
-            tables.add(Table.fromCSV("Attachment", new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString().trim())));
+            PDComplexFileSpecification complexFile = entry.getValue();
+            tables.add(Table.fromCSV("Attachment", new StringReader(complexFile.getEmbeddedFile().getCOSObject()
+                    .toTextString().trim())));
         }
 
         int pageNum = 1;
-        //noinspection unchecked
-        for (PDPage page : (List<PDPage>) doc.getDocumentCatalog().getAllPages()) {
+        for (PDPage page : doc.getDocumentCatalog().getPages()) {
             for (PDAnnotation annotation : page.getAnnotations()) {
                 if (annotation instanceof PDAnnotationFileAttachment) {
                     PDAnnotationFileAttachment fileAttachment = (PDAnnotationFileAttachment) annotation;
                     if (fileAttachment.getSubject().equals(STORED_DATA)) {
                         PDComplexFileSpecification complexFile = (PDComplexFileSpecification) fileAttachment.getFile();
                         tables.add(Table.fromCSV("Page " + pageNum + " Attachment",
-                                new StringReader(complexFile.getEmbeddedFile().getInputStreamAsString().trim())));
+                                new StringReader(complexFile.getEmbeddedFile().getCOSObject()
+                                        .toTextString().trim())));
                     }
                 }
             }
@@ -75,7 +75,7 @@ public class AttachmentDataStorage extends WritableDataStorage {
             ef.setCreationDate(new GregorianCalendar());
             fs.setEmbeddedFile(ef);
 
-            PDPage pdPage = (PDPage) doc.getDocumentCatalog().getAllPages().get(page);
+            PDPage pdPage = doc.getDocumentCatalog().getPages().get(page);
             PDAnnotationFileAttachment annotation = new PDAnnotationFileAttachment();
             annotation.setFile(fs);
             annotation.setPage(pdPage);
@@ -112,7 +112,7 @@ public class AttachmentDataStorage extends WritableDataStorage {
             ef.setCreationDate(new GregorianCalendar());
             fs.setEmbeddedFile(ef);
 
-            Map<String, COSObjectable> efMap = intoMap(efTree.getNames());
+            Map<String, PDComplexFileSpecification> efMap = intoMap(efTree.getNames());
             efMap.put(fs.getFileDescription(), fs);
             efTree.setNames(efMap);
 
