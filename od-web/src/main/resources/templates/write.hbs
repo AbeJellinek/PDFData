@@ -53,21 +53,28 @@
                 <div class="form-group">
                     <label for="pdf" class="col-sm-1 control-label">PDF File</label>
                     <div class="col-sm-11">
-                        <input type="file" name="pdf" id="pdf">
+                        <input type="file" name="pdf" id="pdf" required>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="data" class="col-sm-1 control-label">CSV File</label>
                     <div class="col-sm-11">
-                        <input type="file" name="data" id="data">
+                        <input type="file" name="data" id="data" required>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="page" class="col-sm-1 control-label">Page</label>
+                    <label for="page" class="col-sm-1 control-label">Page (optional)</label>
                     <div class="col-sm-11">
-                        <input type="number" name="page" id="page" class="form-control">
+                        <input type="number" name="page" id="page" class="form-control" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="namedDest" class="col-sm-1 control-label">Named Destination (optional)</label>
+                    <div class="col-sm-11">
+                        <input type="text" name="namedDest" id="namedDest" class="form-control">
                     </div>
                 </div>
 

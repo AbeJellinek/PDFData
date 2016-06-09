@@ -4,6 +4,7 @@ import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import me.abje.xmptest.AttachmentDataStorage;
+import me.abje.xmptest.Destination;
 import me.abje.xmptest.Table;
 import me.abje.xmptest.WritableDataStorage;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -29,17 +30,24 @@ public class WriteController {
     @ResponseBody
     public Resource upload(@RequestParam("pdf") MultipartFile pdf,
                            @RequestParam("data") MultipartFile data,
-                           @RequestParam("page") Integer maybePage,
+                           @RequestParam("page") int page,
+                           @RequestParam("namedDest") String namedDest,
                            HttpServletResponse response) throws IOException, XMPException {
 
         InputStream pdfIn = pdf.getInputStream();
         PDDocument doc = PDDocument.load(pdfIn);
 
         InputStream dataIn = data.getInputStream();
-        int page = (maybePage == null ? 0 : maybePage) - 1; // one-indexed in form, zero-indexed in file. -1 means none.
+        Destination destination;
+        if (!namedDest.isEmpty())
+            destination = Destination.named(namedDest);
+        else if (page != 0)
+            destination = Destination.page(page - 1);
+        else
+            destination = Destination.document();
 
         write(new AttachmentDataStorage(), doc, Table.fromCSV(data.getOriginalFilename().replaceFirst("(.*)\\.csv$", "$1"),
-                new InputStreamReader(dataIn)), page);
+                new InputStreamReader(dataIn)), destination);
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         doc.save(bytes);
@@ -51,7 +59,7 @@ public class WriteController {
         return new ByteArrayResource(bytes.toByteArray());
     }
 
-    private void write(WritableDataStorage storage, PDDocument doc, Table table, int page)
+    private void write(WritableDataStorage storage, PDDocument doc, Table table, Destination destination)
             throws IOException, XMPException {
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
         XMPMeta xmp;
@@ -61,7 +69,7 @@ public class WriteController {
             xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
         }
 
-        storage.write(doc, xmp, table, page);
+        storage.write(doc, xmp, table, destination);
     }
 
 }

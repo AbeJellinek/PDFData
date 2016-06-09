@@ -25,8 +25,7 @@ public class FormDataStorage extends DataStorage {
 
         List<String> columns = new ArrayList<>();
         List<Table.Cell> cells = new ArrayList<>();
-        for (Object obj : form.getFields()) {
-            PDField field = (PDField) obj; // Generics... Use them.
+        for (PDField field : form.getFields()) {
             columns.add(field.getPartialName());
             try {
                 String value = field.getValueAsString();

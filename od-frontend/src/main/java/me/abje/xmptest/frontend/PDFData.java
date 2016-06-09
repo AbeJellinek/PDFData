@@ -58,7 +58,7 @@ public class PDFData {
             xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
         }
 
-        storage.write(doc, xmp, Table.fromCSV("File", new FileReader(sourceFile)), -1);
+        storage.write(doc, xmp, Table.fromCSV("File", new FileReader(sourceFile)), Destination.document());
         doc.save(pdfFile);
     }
 
