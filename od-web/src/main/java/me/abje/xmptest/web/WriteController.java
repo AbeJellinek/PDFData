@@ -54,6 +54,7 @@ public class WriteController {
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         doc.save(bytes);
+        doc.close();
 
         response.setHeader("Content-Type", "application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" +
