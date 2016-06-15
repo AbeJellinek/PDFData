@@ -1,0 +1,123 @@
+Year,Rank,ID,Country,ECI
+2013,1,jpn,Japan,2.29217
+2013,2,che,Switzerland,2.15827
+2013,3,deu,Germany,1.95057
+2013,4,swe,Sweden,1.82719
+2013,5,gbr,United Kingdom,1.71585
+2013,6,cze,Czech Republic,1.70505
+2013,7,kor,South Korea,1.69938
+2013,8,fin,Finland,1.64344
+2013,9,aut,Austria,1.63964
+2013,10,sgp,Singapore,1.62843
+2013,11,usa,United States,1.58003
+2013,12,svn,Slovenia,1.56207
+2013,13,fra,France,1.46865
+2013,14,svk,Slovakia,1.34918
+2013,15,hun,Hungary,1.33979
+2013,16,irl,Ireland,1.26556
+2013,17,ita,Italy,1.22034
+2013,18,isr,Israel,1.21701
+2013,19,dnk,Denmark,1.18973
+2013,20,nld,Netherlands,1.1282
+2013,21,pol,Poland,1.12265
+2013,22,chn,China,0.964874
+2013,23,mex,Mexico,0.950146
+2013,24,nor,Norway,0.945665
+2013,25,esp,Spain,0.933439
+2013,26,hrv,Croatia,0.902756
+2013,27,blr,Belarus,0.889821
+2013,28,est,Estonia,0.814546
+2013,29,tha,Thailand,0.757737
+2013,30,ltu,Lithuania,0.730693
+2013,31,ukr,Ukraine,0.712094
+2013,32,rou,Romania,0.708925
+2013,33,can,Canada,0.700305
+2013,34,mys,Malaysia,0.692526
+2013,35,lva,Latvia,0.610991
+2013,36,hkg,Hong Kong,0.601121
+2013,37,bgr,Bulgaria,0.561561
+2013,38,rus,Russia,0.547873
+2013,39,prt,Portugal,0.506501
+2013,40,tur,Turkey,0.466553
+2013,41,bih,Bosnia and Herzegovina,0.414588
+2013,42,sau,Saudi Arabia,0.375092
+2013,43,nzl,New Zealand,0.334655
+2013,44,pan,Panama,0.325359
+2013,45,zaf,South Africa,0.318725
+2013,46,are,United Arab Emirates,0.3147
+2013,47,lbn,Lebanon,0.289069
+2013,48,grc,Greece,0.270186
+2013,49,phl,Philippines,0.268753
+2013,50,ind,India,0.261756
+2013,51,jor,Jordan,0.212874
+2013,52,ury,Uruguay,0.196912
+2013,53,arg,Argentina,0.186702
+2013,54,col,Colombia,0.170624
+2013,55,cri,Costa Rica,0.161663
+2013,56,bra,Brazil,0.152432
+2013,57,tun,Tunisia,0.07079
+2013,58,mda,Moldova,0.0144264
+2013,59,kwt,Kuwait,-0.0118002
+2013,60,slv,El Salvador,-0.0119415
+2013,61,mkd,Macedonia,-0.0212555
+2013,63,geo,Georgia,-0.0530288
+2013,64,mus,Mauritius,-0.0781186
+2013,66,zmb,Zambia,-0.122758
+2013,67,chl,Chile,-0.132405
+2013,68,egy,Egypt,-0.146013
+2013,69,kgz,Kyrgyzstan,-0.178424
+2013,70,tto,Trinidad and Tobago,-0.188125
+2013,71,aus,Australia,-0.195771
+2013,72,idn,Indonesia,-0.249507
+2013,73,vnm,Vietnam,-0.266684
+2013,74,jam,Jamaica,-0.330662
+2013,75,alb,Albania,-0.342037
+2013,76,gtm,Guatemala,-0.37683
+2013,77,uga,Uganda,-0.385743
+2013,78,lbr,Liberia,-0.416505
+2013,79,pry,Paraguay,-0.417881
+2013,80,dom,Dominican Republic,-0.420921
+2013,81,kaz,Kazakhstan,-0.440195
+2013,82,omn,Oman,-0.446623
+2013,83,qat,Qatar,-0.480727
+2013,84,lka,Sri Lanka,-0.545246
+2013,85,per,Peru,-0.552895
+2013,86,ken,Kenya,-0.568345
+2013,87,hnd,Honduras,-0.591681
+2013,88,mar,Morocco,-0.603177
+2013,89,pak,Pakistan,-0.660541
+2013,90,uzb,Uzbekistan,-0.672254
+2013,91,zwe,Zimbabwe,-0.736728
+2013,92,irn,Iran,-0.738944
+2013,93,bol,Bolivia,-0.759907
+2013,94,ecu,Ecuador,-0.793251
+2013,95,nic,Nicaragua,-0.810177
+2013,96,mwi,Malawi,-0.828101
+2013,97,tza,Tanzania,-0.886502
+2013,98,civ,Cote d'Ivoire,-0.902604
+2013,99,ven,Venezuela,-0.908022
+2013,100,gha,Ghana,-0.947597
+2013,101,cog,Republic of the Congo,-0.954759
+2013,102,aze,Azerbaijan,-0.988968
+2013,103,sen,Senegal,-1.01994
+2013,104,mli,Mali,-1.02179
+2013,105,khm,Cambodia,-1.02553
+2013,106,mdg,Madagascar,-1.08943
+2013,107,yem,Yemen,-1.1433
+2013,108,eth,Ethiopia,-1.20159
+2013,109,mng,Mongolia,-1.24095
+2013,110,tjk,Tajikistan,-1.29005
+2013,111,bgd,Bangladesh,-1.32677
+2013,112,lao,Laos,-1.32923
+2013,113,sdn,Sudan,-1.34436
+2013,114,dza,Algeria,-1.39205
+2013,115,moz,Mozambique,-1.40364
+2013,116,gab,Gabon,-1.46509
+2013,117,ago,Angola,-1.46885
+2013,118,cmr,Cameroon,-1.46969
+2013,119,nga,Nigeria,-1.57253
+2013,120,png,Papua New Guinea,-1.66999
+2013,121,mrt,Mauritania,-1.70214
+2013,122,lby,Libya,-1.71156
+2013,123,tkm,Turkmenistan,-1.75298
+2013,124,gin,Guinea,-2.10227

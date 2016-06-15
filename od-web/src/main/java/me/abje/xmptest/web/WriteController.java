@@ -32,6 +32,7 @@ public class WriteController {
                            @RequestParam("data") MultipartFile data,
                            @RequestParam("page") int page,
                            @RequestParam("namedDest") String namedDest,
+                           @RequestParam("fragment") String fragment,
                            HttpServletResponse response) throws IOException, XMPException {
 
         InputStream pdfIn = pdf.getInputStream();
@@ -39,7 +40,9 @@ public class WriteController {
 
         InputStream dataIn = data.getInputStream();
         Destination destination;
-        if (!namedDest.isEmpty())
+        if (!fragment.isEmpty())
+            destination = Destination.fragment(fragment);
+        else if (!namedDest.isEmpty())
             destination = Destination.named(namedDest);
         else if (page != 0)
             destination = Destination.page(page - 1);

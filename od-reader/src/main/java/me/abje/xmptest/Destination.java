@@ -8,12 +8,56 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationFileAttachme
 import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public abstract class Destination {
+
+    private static final String KEY_NAMEDDEST = "nameddest";
+    private static final String KEY_PAGE = "page";
+
     public abstract void writeAttachment(PDDocument doc, PDComplexFileSpecification file) throws IOException;
+
+    private static Map<String, String> parseFragmentIdentifier(String fragment) throws IllegalArgumentException {
+        try {
+            if (fragment.startsWith("#")) // remove hash on beginning of fragment
+                fragment = fragment.substring(1);
+            String[] parts = fragment.split("&");
+            Map<String, String> parameters = new HashMap<>();
+
+            for (String part : parts) {
+                if (part.indexOf('=') == -1) {
+                    String key = URLDecoder.decode(part, "UTF-8");
+                    parameters.put(key, key);
+                } else {
+                    String[] keyValue = part.split("=");
+                    if (keyValue.length != 2)
+                        throw new IllegalArgumentException("Invalid fragment format.");
+
+                    String key = URLDecoder.decode(keyValue[0], "UTF-8");
+                    String value = URLDecoder.decode(keyValue[1], "UTF-8");
+                    parameters.put(key, value);
+                }
+            }
+
+            return parameters;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return new HashMap<>();
+        }
+    }
+
+    public static Destination fragment(String fragment) throws IllegalArgumentException {
+        Map<String, String> parameters = parseFragmentIdentifier(fragment);
+        if (parameters.containsKey(KEY_NAMEDDEST))
+            return named(parameters.get(KEY_NAMEDDEST));
+        if (parameters.containsKey(KEY_PAGE))
+            return page(Integer.parseInt(parameters.get(KEY_PAGE)) - 1);
+        return document();
+    }
 
     public static Destination document() {
         return new DocumentDestination();
