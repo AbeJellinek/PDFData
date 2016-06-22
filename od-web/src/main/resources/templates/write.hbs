@@ -65,23 +65,34 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="page" class="col-sm-1 control-label">Page (optional)</label>
-                    <div class="col-sm-11">
-                        <input type="number" name="page" id="page" class="form-control" value="0">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="namedDest" class="col-sm-1 control-label">Named Destination (optional)</label>
-                    <div class="col-sm-11">
-                        <input type="text" name="namedDest" id="namedDest" class="form-control">
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label for="fragment" class="col-sm-1 control-label">Fragment Identifier (optional)</label>
                     <div class="col-sm-11">
-                        <input type="text" name="fragment" id="fragment" class="form-control">
+                        <div class="input-group">
+                            <input type="text" name="fragment" id="fragment" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" data-toggle="collapse"
+                                        data-target="#edit" aria-expanded="false" aria-controls="edit">Edit</button>
+                            </span>
+                        </div>
+
+                        <div id="edit" class="collapse">
+                            <div class="well">
+                                <div class="form-group">
+                                    <label for="page" class="col-sm-2 control-label">Page (optional)</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" id="page" class="form-control" value="0">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="namedDest" class="col-sm-2 control-label">Named Destination
+                                        (optional)</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" id="namedDest" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -105,6 +116,45 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="/js/bootstrap.min.js"></script>
+
+<script>
+    function deparam(query) {
+        var result = {};
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair.length == 2) {
+                pair[0] = decodeURIComponent(pair[0]);
+                pair[1] = decodeURIComponent(pair[1]);
+                result[pair[0]] = pair[1];
+            }
+        }
+        return result;
+    }
+
+    var $page = $('#page');
+    var $namedDest = $('#namedDest');
+    var $fragment = $('#fragment');
+
+    $('#page, #namedDest').on('change keyup paste', function () {
+        var pageVal = $page.val();
+        var namedDestVal = $namedDest.val();
+        var params = {};
+
+        if (pageVal && pageVal != '0')
+            params['page'] = pageVal;
+        if (namedDestVal)
+            params['nameddest'] = namedDestVal;
+        $fragment.val('#' + $.param(params));
+    });
+
+    $fragment.on('change keyup paste', function () {
+        var fragmentVal = $fragment.val();
+        var params = deparam(fragmentVal[0] == '#' ? fragmentVal.substring(1) : fragmentVal);
+        $page.val(params['page'] || '0');
+        $namedDest.val(params['nameddest'] || '');
+    });
+</script>
 
 </body>
 </html>

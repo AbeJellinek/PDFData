@@ -30,8 +30,6 @@ public class WriteController {
     @ResponseBody
     public Resource upload(@RequestParam("pdf") MultipartFile pdf,
                            @RequestParam("data") MultipartFile data,
-                           @RequestParam("page") int page,
-                           @RequestParam("namedDest") String namedDest,
                            @RequestParam("fragment") String fragment,
                            HttpServletResponse response) throws IOException, XMPException {
 
@@ -39,15 +37,7 @@ public class WriteController {
         PDDocument doc = PDDocument.load(pdfIn);
 
         InputStream dataIn = data.getInputStream();
-        Destination destination;
-        if (!fragment.isEmpty())
-            destination = Destination.fragment(fragment);
-        else if (!namedDest.isEmpty())
-            destination = Destination.named(namedDest);
-        else if (page != 0)
-            destination = Destination.page(page - 1);
-        else
-            destination = Destination.document();
+        Destination destination = Destination.fragment(fragment);
 
         write(new AttachmentDataStorage(), doc, Table.fromCSV(data.getOriginalFilename().replaceFirst("(.*)\\.csv$", "$1"),
                 new InputStreamReader(dataIn)), destination);
