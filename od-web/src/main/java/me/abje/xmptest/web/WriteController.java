@@ -3,6 +3,7 @@ package me.abje.xmptest.web;
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
+import com.google.common.io.Files;
 import me.abje.xmptest.AttachmentDataStorage;
 import me.abje.xmptest.Destination;
 import me.abje.xmptest.Table;
@@ -39,8 +40,11 @@ public class WriteController {
         InputStream dataIn = data.getInputStream();
         Destination destination = Destination.fragment(fragment);
 
-        write(new AttachmentDataStorage(), doc, Table.fromCSV(data.getOriginalFilename().replaceFirst("(.*)\\.csv$", "$1"),
-                new InputStreamReader(dataIn)), destination);
+        write(new AttachmentDataStorage(), doc,
+                Table.fromCSV(
+                        Files.getNameWithoutExtension(data.getOriginalFilename()),
+                        new InputStreamReader(dataIn)),
+                destination);
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         doc.save(bytes);
