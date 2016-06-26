@@ -1,4 +1,4 @@
-group 'me.abje'
+group 'im.abe'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -30,9 +30,10 @@ project(':od-reader') {
 project(':od-frontend') {
     apply plugin: 'application'
 
-    mainClassName = "me.abje.xmptest.frontend.PDFData"
+    mainClassName = "im.abe.pdfdata.frontend.PDFData"
 
     dependencies {
+        compile 'com.beust:jcommander:1.48'
         compile project(':od-reader')
     }
 }
