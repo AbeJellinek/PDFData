@@ -28,14 +28,30 @@ public class PDFData {
 
     @Parameters(separators = "=", commandDescription = "Read data from a PDF file")
     private static class ReadCommand {
-        @Parameter(names = "--json", description = "Output as JSON")
-        private boolean shouldOutputJson;
+        @Parameter(names = "--format", description = "Output format (values: JSON, CSV, RDF/XML, TURTLE)")
+        private String outputFormat = "CSV";
 
         @Parameter(description = "Input PDF file", required = true)
         private List<String> inputPaths;
 
         @Parameter(names = "-o", description = "Output file")
         private String outputPath;
+
+        public Format getFormat() {
+            switch (outputFormat.toUpperCase()) {
+                case "JSON":
+                    return Format.JSON;
+                case "RDF":
+                case "RDF_XML":
+                case "RDF/XML":
+                case "RDFXML":
+                    return Format.RDF_XML;
+                case "TURTLE":
+                    return Format.TURTLE;
+                default:
+                    return Format.CSV;
+            }
+        }
     }
 
     @Parameters(separators = "=", commandDescription = "Write data to a PDF file")
@@ -131,13 +147,13 @@ public class PDFData {
                         }
 
                         FileWriter writer = new FileWriter(outFile);
-                        writer.write(read.shouldOutputJson ? table.toJSON(false) : table.toCSV());
+                        writer.write(table.to(read.getFormat()));
                         writer.close();
                     }
                 } else {
                     for (Table table : tables) {
                         System.out.println(table.getName() + ":");
-                        System.out.println(read.shouldOutputJson ? table.toJSON(false) : table.toCSV());
+                        System.out.println(table.to(read.getFormat()));
                     }
                 }
             }

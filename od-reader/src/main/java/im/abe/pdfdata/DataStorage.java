@@ -16,7 +16,7 @@ public abstract class DataStorage {
     /**
      * The schema used for open data properties. Registered in this class's {@code static {}} block.
      */
-    public static final String SCHEMA_OD = "http://xmptest.abje.me/od/1.0/";
+    public static final String SCHEMA_OD = "http://pdf.abe.im/od/1.0/";
 
     static {
         try {

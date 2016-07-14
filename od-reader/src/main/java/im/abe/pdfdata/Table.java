@@ -3,6 +3,7 @@ package im.abe.pdfdata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.google.common.net.UrlEscapers;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -21,13 +22,13 @@ import java.util.stream.Collectors;
 public class Table {
     private static final CSVFormat FORMAT = CSVFormat.EXCEL.withHeader();
     private String name;
-    private List<String> columns;
+    private List<String> columnNames;
     private List<List<Cell>> cells;
     private int width, height;
 
-    public Table(String name, List<String> columns, List<List<Cell>> cells, int width, int height) {
+    public Table(String name, List<String> columnNames, List<List<Cell>> cells, int width, int height) {
         this.name = name;
-        this.columns = columns;
+        this.columnNames = columnNames;
         this.cells = cells;
         this.width = width;
         this.height = height;
@@ -50,15 +51,15 @@ public class Table {
     }
 
     private String getColumnName(int column) {
-        if (column >= 0 && column < columns.size()) {
-            return columns.get(column);
+        if (column >= 0 && column < columnNames.size()) {
+            return columnNames.get(column);
         } else {
             return null;
         }
     }
 
     public List<String> getColumnNames() {
-        return columns;
+        return columnNames;
     }
 
     public int getWidth() {
@@ -73,10 +74,27 @@ public class Table {
         return cells;
     }
 
-    public String toCSV() {
+    public String to(Format format) {
+        switch (format) {
+            case JSON:
+                try {
+                    return toJSON(false);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            case RDF_XML:
+                return toRDFFormat("RDF/XML");
+            case TURTLE:
+                return toRDFFormat("TURTLE");
+            default:
+                return toCSV();
+        }
+    }
+
+    private String toCSV() {
         StringBuilder builder = new StringBuilder();
         try {
-            CSVPrinter printer = FORMAT.withHeader(columns.toArray(new String[columns.size()])).print(builder);
+            CSVPrinter printer = FORMAT.withHeader(columnNames.toArray(new String[columnNames.size()])).print(builder);
             printer.printRecords(cells);
         } catch (IOException e) {
             e.printStackTrace();
@@ -97,7 +115,7 @@ public class Table {
         return data;
     }
 
-    public String toJSON(boolean prettyPrint) throws JsonProcessingException {
+    private String toJSON(boolean prettyPrint) throws JsonProcessingException {
         List<Map<String, String>> data = toJSONData(this);
         if (prettyPrint) {
             return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data);
@@ -106,30 +124,18 @@ public class Table {
         }
     }
 
-    public static String allToJSON(List<Table> tables, boolean prettyPrint) throws JsonProcessingException {
-        List<List<Map<String, String>>> data = tables.stream().map(Table::toJSONData).collect(Collectors.toList());
-        if (prettyPrint) {
-            return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data);
-        } else {
-            return new ObjectMapper().writeValueAsString(data);
-        }
-    }
-
-    public String toFormat(String lang) {
+    private String toRDFFormat(String lang) {
         Model model = ModelFactory.createDefaultModel();
+        model.setNsPrefix("p", DataStorage.SCHEMA_OD);
 
-        List<RDFNode> nodes = new ArrayList<>();
-        for (List<Cell> rowList : cells) {
+        for (List<Cell> columns : cells) {
             Resource row = model.createResource();
-            for (int i = 0; i < rowList.size(); i++) {
-                Cell cell = rowList.get(i);
-                row.addLiteral(model.createProperty(DataStorage.SCHEMA_OD, "_c" + i), cell.getValue());
+            for (int i = 0; i < columns.size(); i++) {
+                Cell cell = columns.get(i);
+                String escapedName = UrlEscapers.urlFragmentEscaper().escape(columnNames.get(i));
+                row.addLiteral(model.createProperty(DataStorage.SCHEMA_OD, escapedName), cell.getValue());
             }
-            nodes.add(row);
         }
-
-        RDFList rows = model.createList(nodes.iterator());
-        model.createResource().addProperty(model.createProperty(DataStorage.SCHEMA_OD, "Data"), rows);
 
         StringWriter writer = new StringWriter();
         model.write(writer, lang);
@@ -144,20 +150,20 @@ public class Table {
         return Objects.equals(width, table.width) &&
                 Objects.equals(height, table.height) &&
                 Objects.equals(name, table.name) &&
-                Objects.equals(columns, table.columns) &&
+                Objects.equals(columnNames, table.columnNames) &&
                 Objects.equals(cells, table.cells);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, columns, cells, width, height);
+        return Objects.hash(name, columnNames, cells, width, height);
     }
 
     @Override
     public String toString() {
         return "Table{" +
                 "name='" + name + '\'' +
-                ", columns=" + columns +
+                ", columnNames=" + columnNames +
                 ", cells=" + cells +
                 ", width=" + width +
                 ", height=" + height +

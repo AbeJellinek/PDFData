@@ -66,7 +66,7 @@ public class AttachmentDataStorage extends WritableDataStorage {
         fs.setFile(table.getName() + ".csv");
         fs.setFileDescription("META_" + UUID.randomUUID().toString());
 
-        byte[] data = table.toCSV().getBytes("UTF-8");
+        byte[] data = table.to(Format.CSV).getBytes("UTF-8");
         PDEmbeddedFile ef = new PDEmbeddedFile(doc, new ByteArrayInputStream(data));
         ef.setSize(data.length);
         ef.setCreationDate(new GregorianCalendar());
