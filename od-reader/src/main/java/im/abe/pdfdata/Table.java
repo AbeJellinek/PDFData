@@ -83,9 +83,9 @@ public class Table {
                     throw new RuntimeException(e);
                 }
             case RDF_XML:
-                return toRDFFormat("RDF/XML");
+                return toRdfFormat("RDF/XML");
             case TURTLE:
-                return toRDFFormat("TURTLE");
+                return toRdfFormat("TURTLE");
             default:
                 return toCSV();
         }
@@ -124,16 +124,15 @@ public class Table {
         }
     }
 
-    private String toRDFFormat(String lang) {
+    private String toRdfFormat(String lang) {
         Model model = ModelFactory.createDefaultModel();
-        model.setNsPrefix("p", DataStorage.SCHEMA_OD);
 
         for (List<Cell> columns : cells) {
             Resource row = model.createResource();
             for (int i = 0; i < columns.size(); i++) {
                 Cell cell = columns.get(i);
                 String escapedName = UrlEscapers.urlFragmentEscaper().escape(columnNames.get(i));
-                row.addLiteral(model.createProperty(DataStorage.SCHEMA_OD, escapedName), cell.getValue());
+                row.addLiteral(model.createProperty("#", escapedName), cell.getValue());
             }
         }
 
