@@ -38,19 +38,7 @@ public class PDFData {
         private String outputPath;
 
         public Format getFormat() {
-            switch (outputFormat.toUpperCase()) {
-                case "JSON":
-                    return Format.JSON;
-                case "RDF":
-                case "RDF_XML":
-                case "RDF/XML":
-                case "RDFXML":
-                    return Format.RDF_XML;
-                case "TURTLE":
-                    return Format.TURTLE;
-                default:
-                    return Format.CSV;
-            }
+            return Format.find(outputFormat);
         }
     }
 
