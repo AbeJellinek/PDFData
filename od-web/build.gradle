@@ -56,3 +56,7 @@ eclipse {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.7'
 }
+
+springBoot {
+    mainClass = "im.abe.pdfdata.web.PDFDataApplication"
+}
