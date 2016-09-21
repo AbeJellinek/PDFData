@@ -40,11 +40,18 @@ public class WriteController {
         InputStream dataIn = data.getInputStream();
         Destination destination = Destination.fragment(fragment);
 
-        write(new AttachmentDataStorage(), doc,
-                Table.fromCSV(
-                        Files.getNameWithoutExtension(data.getOriginalFilename()),
-                        new InputStreamReader(dataIn)),
-                destination);
+        final String fileName = data.getOriginalFilename();
+        final String nameWithoutExtension = Files.getNameWithoutExtension(fileName);
+
+        final Table table;
+        if (isXlsFile(fileName)) {
+            table = Table.fromXLS(nameWithoutExtension, dataIn);
+        } else {
+            // assume CSV
+            table = Table.fromCSV(nameWithoutExtension, new InputStreamReader(dataIn));
+        }
+
+        write(new AttachmentDataStorage(), doc, table, destination);
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         doc.save(bytes);
@@ -52,7 +59,7 @@ public class WriteController {
 
         response.setHeader("Content-Type", "application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" +
-                pdf.getOriginalFilename().replace(".pdf", "_data.pdf") + "\"");
+                nameWithoutExtension + "_data.pdf" + "\"");
 
         return new ByteArrayResource(bytes.toByteArray());
     }
@@ -68,6 +75,18 @@ public class WriteController {
         }
 
         storage.write(doc, xmp, table, destination);
+    }
+
+    /**
+     * Return true if this file name denotes an XLS or XLSX file.  Perhaps it would be better to test the
+     * content-type of the uploaded file?
+     *
+     * @param fileName the file name to test
+     * @return true if it's an XLS or XLSX file, false otherwise
+     */
+    private boolean isXlsFile(String fileName) {
+        final String extension = Files.getFileExtension(fileName).toLowerCase();
+        return "xls".equals(extension) || "xlsx".equals(extension);
     }
 
 }
