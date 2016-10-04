@@ -3,6 +3,7 @@ package im.abe.pdfdata;
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
+import com.google.common.io.Files;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.IOException;
@@ -36,4 +37,16 @@ public abstract class DataStorage {
      * @throws IOException  If an I/O error occurs. (Unlikely.)
      */
     public abstract List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException;
+
+    /**
+     * Return true if this file name denotes an XLS or XLSX file.  Perhaps it would be better to test the
+     * content-type of the uploaded file?
+     *
+     * @param fileName the file name to test
+     * @return true if it's an XLS or XLSX file, false otherwise
+     */
+    public static boolean isXlsFile(String fileName) {
+        final String extension = Files.getFileExtension(fileName).toLowerCase();
+        return "xls".equals(extension) || "xlsx".equals(extension);
+    }
 }

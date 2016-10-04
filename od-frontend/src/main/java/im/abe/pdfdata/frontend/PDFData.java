@@ -9,10 +9,7 @@ import im.abe.pdfdata.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -85,14 +82,20 @@ public class PDFData {
     public void write(WritableDataStorage storage, File sourceFile, File pdfFile) throws IOException, XMPException {
         PDDocument doc = PDDocument.load(pdfFile);
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
-        XMPMeta xmp;
+        final XMPMeta xmp;
         if (catalog.getMetadata() == null) {
             xmp = XMPMetaFactory.create();
         } else {
             xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
         }
 
-        storage.write(doc, xmp, Table.fromCSV("File", new FileReader(sourceFile)), Destination.document());
+        final Table table;
+        if (DataStorage.isXlsFile(sourceFile.getPath())) {
+            table = Table.fromXLS("File", new FileInputStream(sourceFile));
+        } else {
+            table = Table.fromCSV("File", new FileReader(sourceFile));
+        }
+        storage.write(doc, xmp, table, Destination.document());
         doc.save(pdfFile);
     }
 
@@ -170,8 +173,8 @@ public class PDFData {
         // I'm really not sure of how this should be formatted, but it's fine for now.
 
         System.out.println("Usage: pdfdata\n" +
-                "    read  <pdf file> [output file]\n" +
-                "    write <source file> -o <pdf file>\n\n" +
+                "    read  <pdf file> [-o output file]\n" +
+                "    write <source file> <pdf file>\n\n" +
 
                 "Options:\n" +
                 "    -h, --help: print this help message and exit");

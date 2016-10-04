@@ -4,10 +4,7 @@ import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import com.google.common.io.Files;
-import im.abe.pdfdata.AttachmentDataStorage;
-import im.abe.pdfdata.Destination;
-import im.abe.pdfdata.Table;
-import im.abe.pdfdata.WritableDataStorage;
+import im.abe.pdfdata.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.springframework.core.io.ByteArrayResource;
@@ -44,7 +41,7 @@ public class WriteController {
         final String nameWithoutExtension = Files.getNameWithoutExtension(fileName);
 
         final Table table;
-        if (isXlsFile(fileName)) {
+        if (DataStorage.isXlsFile(fileName)) {
             table = Table.fromXLS(nameWithoutExtension, dataIn);
         } else {
             // assume CSV
@@ -75,18 +72,6 @@ public class WriteController {
         }
 
         storage.write(doc, xmp, table, destination);
-    }
-
-    /**
-     * Return true if this file name denotes an XLS or XLSX file.  Perhaps it would be better to test the
-     * content-type of the uploaded file?
-     *
-     * @param fileName the file name to test
-     * @return true if it's an XLS or XLSX file, false otherwise
-     */
-    private boolean isXlsFile(String fileName) {
-        final String extension = Files.getFileExtension(fileName).toLowerCase();
-        return "xls".equals(extension) || "xlsx".equals(extension);
     }
 
 }
