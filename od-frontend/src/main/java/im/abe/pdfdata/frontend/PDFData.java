@@ -74,6 +74,7 @@ public class PDFData {
         tables.addAll(read(new AttachmentDataStorage(), doc));
         tables.addAll(read(new FormDataStorage(), doc));
         tables.addAll(read(new XMPDataStorage(), doc));
+        tables.addAll(read(new PDFMetaDataStorage(), doc));
 
         doc.close();
         return tables;
