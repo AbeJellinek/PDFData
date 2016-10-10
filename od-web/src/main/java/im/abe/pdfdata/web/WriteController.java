@@ -4,10 +4,7 @@ import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import com.google.common.io.Files;
-import im.abe.pdfdata.AttachmentDataStorage;
-import im.abe.pdfdata.Destination;
-import im.abe.pdfdata.Table;
-import im.abe.pdfdata.WritableDataStorage;
+import im.abe.pdfdata.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.springframework.core.io.ByteArrayResource;
@@ -40,11 +37,18 @@ public class WriteController {
         InputStream dataIn = data.getInputStream();
         Destination destination = Destination.fragment(fragment);
 
-        write(new AttachmentDataStorage(), doc,
-                Table.fromCSV(
-                        Files.getNameWithoutExtension(data.getOriginalFilename()),
-                        new InputStreamReader(dataIn)),
-                destination);
+        final String fileName = data.getOriginalFilename();
+        final String nameWithoutExtension = Files.getNameWithoutExtension(fileName);
+
+        final Table table;
+        if (DataStorage.isXlsFile(fileName)) {
+            table = Table.fromXLS(nameWithoutExtension, dataIn);
+        } else {
+            // assume CSV
+            table = Table.fromCSV(nameWithoutExtension, new InputStreamReader(dataIn));
+        }
+
+        write(new AttachmentDataStorage(), doc, table, destination);
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         doc.save(bytes);
@@ -52,7 +56,7 @@ public class WriteController {
 
         response.setHeader("Content-Type", "application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" +
-                pdf.getOriginalFilename().replace(".pdf", "_data.pdf") + "\"");
+                nameWithoutExtension + "_data.pdf" + "\"");
 
         return new ByteArrayResource(bytes.toByteArray());
     }

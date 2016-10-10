@@ -22,6 +22,9 @@ project(':od-reader') {
         compile 'org.apache.commons:commons-csv:1.1'
         compile 'com.fasterxml.jackson.core:jackson-databind:2.6.1'
         compile 'org.apache.jena:apache-jena-libs:3.0.0'
+        compile('org.apache.poi:poi:3.14')
+        compile('org.apache.poi:poi-ooxml:3.14')
+        compile('org.apache.poi:poi-ooxml-schemas:3.14')
         compile project(':xmpcore')
         testCompile group: 'junit', name: 'junit', version: '4.11'
     }

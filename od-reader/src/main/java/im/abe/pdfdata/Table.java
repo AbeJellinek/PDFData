@@ -8,13 +8,23 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.jena.rdf.model.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A set of tabular data with optional column headings.
@@ -194,6 +204,38 @@ public class Table {
         return new Table(name, headers, cells, width, height);
     }
 
+    public static Table fromXLS(String name, InputStream inputStream) throws IOException {
+        final Workbook wb;
+        try {
+            wb = WorkbookFactory.create(inputStream);
+        } catch (InvalidFormatException e) {
+            throw new IOException("Reading workbook", e);
+        }
+
+        // for now, only handle the first sheet
+        final Sheet sheet = wb.getSheetAt(0);
+
+        final Row headerRow = sheet.getRow(0);
+        List<String> headers = getHeaders(headerRow);
+
+        int runningWidth = headers.size();
+        List<List<Table.Cell>> tableCells = new ArrayList<>();
+
+        final Iterator<Row> rows = sheet.rowIterator();
+        rows.next();
+        while (rows.hasNext()) {
+            final List<Table.Cell> resultRow = new LinkedList<>();
+            final Row row = rows.next();
+            for (org.apache.poi.ss.usermodel.Cell cell : row) {
+                resultRow.add(new Table.Cell(getCellValueAsString(cell)));
+            }
+            tableCells.add(resultRow);
+            runningWidth = Math.max(runningWidth, resultRow.size());
+        }
+
+        return new Table(name, headers, tableCells, runningWidth, tableCells.size());
+    }
+
     private static List<String> getHeaders(CSVParser parser) {
         if (parser.getHeaderMap() == null)
             return new ArrayList<>();
@@ -201,6 +243,38 @@ public class Table {
         ArrayList<Map.Entry<String, Integer>> entries = Lists.newArrayList(parser.getHeaderMap().entrySet());
         Collections.sort(entries, (o1, o2) -> o1.getValue().compareTo(o2.getValue()));
         return entries.stream().map(Map.Entry::getKey).collect(Collectors.toList());
+    }
+
+    private static List<String> getHeaders(Row headerRow) {
+        final Iterable<org.apache.poi.ss.usermodel.Cell> iterable = headerRow::cellIterator;
+        final Stream<org.apache.poi.ss.usermodel.Cell> stream = StreamSupport.stream(iterable.spliterator(), false);
+        return stream.map(Table::getCellValueAsString).collect(Collectors.toList());
+    }
+
+    private static String getCellValueAsString(org.apache.poi.ss.usermodel.Cell cell) {
+        switch (cell.getCellType()) {
+            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK: {
+                return "";
+            }
+            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BOOLEAN: {
+                return Boolean.toString(cell.getBooleanCellValue());
+            }
+            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_ERROR: {
+                return "!! ERROR !!";
+            }
+            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA: {
+                return cell.getCellFormula();
+            }
+            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC: {
+                return Double.toString(cell.getNumericCellValue());
+            }
+            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING: {
+                return cell.getStringCellValue();
+            }
+            default: {
+                return "!! UNKNOWN CELL TYPE "+cell.getCellType()+" !!";
+            }
+        }
     }
 
     /**
