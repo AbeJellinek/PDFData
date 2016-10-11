@@ -92,11 +92,9 @@ public class PDFData {
 
         final Table table;
         if (DataStorage.isXlsFile(sourceFile.getPath())) {
-            table = Table.fromXLS(DataStorage.nameAttachment(pdfFile.getName(), 0, 0, 0),
-                    new FileInputStream(sourceFile));
+            table = Table.fromXLS(pdfFile.getName(), new FileInputStream(sourceFile));
         } else {
-            table = Table.fromCSV(DataStorage.nameAttachment(pdfFile.getName(), 0, 0, 0),
-                    new FileReader(sourceFile));
+            table = Table.fromCSV(pdfFile.getName(), new FileReader(sourceFile));
         }
         storage.write(doc, xmp, table, Destination.document());
         doc.save(pdfFile);
