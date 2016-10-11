@@ -272,7 +272,7 @@ public class Table {
                 return cell.getStringCellValue();
             }
             default: {
-                return "!! UNKNOWN CELL TYPE "+cell.getCellType()+" !!";
+                return "!! UNKNOWN CELL TYPE " + cell.getCellType() + " !!";
             }
         }
     }
