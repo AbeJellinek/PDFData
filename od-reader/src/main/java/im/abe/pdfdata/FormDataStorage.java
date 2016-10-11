@@ -38,6 +38,6 @@ public class FormDataStorage extends DataStorage {
                 cells.add(new Table.Cell(""));
             }
         }
-        return Lists.newArrayList(new Table("Form", columns, Collections.singletonList(cells), columns.size(), cells.size()));
+        return Lists.newArrayList(new Table("Form", columns, Collections.singletonList(cells)));
     }
 }

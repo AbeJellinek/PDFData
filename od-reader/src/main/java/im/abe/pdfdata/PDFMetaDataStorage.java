@@ -29,7 +29,7 @@ public class PDFMetaDataStorage extends DataStorage {
         List<Table> tables = new ArrayList<>();
         List<List<Table.Cell>> cells = new ArrayList<>();
         cells.add(values);
-        tables.add(new Table("Metadata", keys, cells, values.size(), 1));
+        tables.add(new Table("Metadata", keys, cells));
 
         return tables;
     }

@@ -39,6 +39,6 @@ public class AnnotationDataStorage extends DataStorage {
 
         if (!hasAnnotations)
             return new ArrayList<>();
-        return Lists.newArrayList(new Table("Annotations", columns, cells, columns.size(), cells.size()));
+        return Lists.newArrayList(new Table("Annotations", columns, cells));
     }
 }

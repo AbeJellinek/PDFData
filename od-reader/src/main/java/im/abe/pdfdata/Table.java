@@ -34,19 +34,21 @@ public class Table {
     private String name;
     private List<String> columnNames;
     private List<List<Cell>> cells;
-    private int width, height;
 
-    public Table(String name, List<String> columnNames, List<List<Cell>> cells, int width, int height) {
+    public Table(String name, List<String> columnNames, List<List<Cell>> cells) {
         this.name = name;
         this.columnNames = columnNames;
         this.cells = cells;
-        this.width = width;
-        this.height = height;
     }
 
     public Cell get(int row, int column) {
-        if (row >= 0 && row < height && column >= 0 && column < height) {
-            return cells.get(row).get(column);
+        if (row >= 0 && row < cells.size() && column >= 0) {
+            List<Cell> rowList = cells.get(row);
+            if (column < rowList.size()) {
+                return rowList.get(column);
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
@@ -70,14 +72,6 @@ public class Table {
 
     public List<String> getColumnNames() {
         return columnNames;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     public List<List<Cell>> getCells() {
@@ -156,16 +150,14 @@ public class Table {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Table table = (Table) o;
-        return Objects.equals(width, table.width) &&
-                Objects.equals(height, table.height) &&
-                Objects.equals(name, table.name) &&
+        return Objects.equals(name, table.name) &&
                 Objects.equals(columnNames, table.columnNames) &&
                 Objects.equals(cells, table.cells);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, columnNames, cells, width, height);
+        return Objects.hash(name, columnNames, cells);
     }
 
     @Override
@@ -174,8 +166,6 @@ public class Table {
                 "name='" + name + '\'' +
                 ", columnNames=" + columnNames +
                 ", cells=" + cells +
-                ", width=" + width +
-                ", height=" + height +
                 '}';
     }
 
@@ -184,24 +174,14 @@ public class Table {
 
         List<String> headers = getHeaders(parser);
         List<List<Table.Cell>> cells = new ArrayList<>();
-        int width = 0;
-        int height = 0;
         for (CSVRecord record : parser) {
-            height++;
-
             List<Table.Cell> row = new ArrayList<>();
-            int i = 0;
-            for (String value : record) {
-                i++;
-                row.add(new Table.Cell(value));
-            }
+            for (String value : record)
+                row.add(new Cell(value));
             cells.add(row);
-
-            if (i > width)
-                width = i;
         }
 
-        return new Table(name, headers, cells, width, height);
+        return new Table(name, headers, cells);
     }
 
     public static Table fromXLS(String name, InputStream inputStream) throws IOException {
@@ -233,7 +213,7 @@ public class Table {
             runningWidth = Math.max(runningWidth, resultRow.size());
         }
 
-        return new Table(name, headers, tableCells, runningWidth, tableCells.size());
+        return new Table(name, headers, tableCells);
     }
 
     private static List<String> getHeaders(CSVParser parser) {
@@ -241,7 +221,7 @@ public class Table {
             return new ArrayList<>();
 
         ArrayList<Map.Entry<String, Integer>> entries = Lists.newArrayList(parser.getHeaderMap().entrySet());
-        Collections.sort(entries, (o1, o2) -> o1.getValue().compareTo(o2.getValue()));
+        entries.sort(Comparator.comparing(Map.Entry::getValue));
         return entries.stream().map(Map.Entry::getKey).collect(Collectors.toList());
     }
 
