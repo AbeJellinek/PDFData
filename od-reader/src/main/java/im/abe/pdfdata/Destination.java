@@ -21,6 +21,8 @@ public abstract class Destination {
 
     public abstract void writeAttachment(PDDocument doc, PDComplexFileSpecification file) throws IOException;
 
+    public abstract String nameAttachment(PDDocument doc, String pdfName);
+
     private static Map<String, String> parseFragmentIdentifier(String fragment) throws IllegalArgumentException {
         try {
             if (fragment.startsWith("#")) // remove hash on beginning of fragment
@@ -90,6 +92,11 @@ public abstract class Destination {
             doc.getDocumentCatalog().setNames(names);
         }
 
+        @Override
+        public String nameAttachment(PDDocument doc, String pdfName) {
+            return pdfName;
+        }
+
         private <K, V> Map<K, V> intoMap(Map<K, V> firstMap) {
             if (firstMap == null) {
                 return new HashMap<>();
@@ -133,6 +140,11 @@ public abstract class Destination {
             annotations.add(annotation);
             page.setAnnotations(annotations);
         }
+
+        @Override
+        public String nameAttachment(PDDocument doc, String pdfName) {
+            return pdfName + "-" + pageNumber;
+        }
     }
 
     private static class NamedDestination extends Destination {
@@ -145,6 +157,32 @@ public abstract class Destination {
         @Override
         public void writeAttachment(PDDocument doc, PDComplexFileSpecification file) throws IOException {
             PDAnnotationFileAttachment annotation = new PDAnnotationFileAttachment();
+            Position position = findPosition(doc);
+
+            if (position.x == -1 && position.y == -1) {
+                new PageDestination(position.page).writeAttachment(doc, file);
+            } else {
+                PDPage page = position.page;
+
+                annotation.setFile(file);
+                annotation.setPage(page);
+                annotation.setAttachementName(PDAnnotationFileAttachment.ATTACHMENT_NAME_PAPERCLIP);
+                annotation.setSubject(AttachmentDataStorage.STORED_DATA);
+
+                PDRectangle rect = new PDRectangle();
+                rect.setLowerLeftX(position.x);
+                rect.setLowerLeftY(position.y + 20);
+                rect.setUpperRightX(position.x + 10);
+                rect.setUpperRightY(position.y);
+                annotation.setRectangle(rect);
+
+                List<PDAnnotation> annotations = page.getAnnotations();
+                annotations.add(annotation);
+                page.setAnnotations(annotations);
+            }
+        }
+
+        private Position findPosition(PDDocument doc) throws IOException {
             PDDocumentNameDictionary names = doc.getDocumentCatalog().getNames();
             if (names == null)
                 throw new RuntimeException("unknown destination: " + name);
@@ -156,7 +194,7 @@ public abstract class Destination {
                 throw new RuntimeException("unknown destination: " + name);
 
             if (destination instanceof PDPageFitDestination) {
-                new PageDestination(destination.getPage()).writeAttachment(doc, file);
+                return new Position(-1, -1, destination.getPage(), destination.getPageNumber());
             } else {
                 int x = 0;
                 int y = 0;
@@ -175,23 +213,41 @@ public abstract class Destination {
                     y = xyz.getTop();
                 }
 
-                PDPage page = destination.getPage();
+                return new Position(x, y, destination.getPage(), destination.getPageNumber());
+            }
+        }
 
-                annotation.setFile(file);
-                annotation.setPage(page);
-                annotation.setAttachementName(PDAnnotationFileAttachment.ATTACHMENT_NAME_PAPERCLIP);
-                annotation.setSubject(AttachmentDataStorage.STORED_DATA);
+        @Override
+        public String nameAttachment(PDDocument doc, String pdfName) {
+            StringBuilder builder = new StringBuilder(pdfName);
+            try {
+                Position position = findPosition(doc);
 
-                PDRectangle rect = new PDRectangle();
-                rect.setLowerLeftX(x);
-                rect.setLowerLeftY(y + 20);
-                rect.setUpperRightX(x + 10);
-                rect.setUpperRightY(y);
-                annotation.setRectangle(rect);
+                if (position.pageNum != 0) {
+                    builder.append("-").append(position.pageNum);
+                }
 
-                List<PDAnnotation> annotations = page.getAnnotations();
-                annotations.add(annotation);
-                page.setAnnotations(annotations);
+                if (position.x > 0 || position.y > 0) {
+                    builder.append("-").append(position.y).append(".").append(position.x);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return builder.toString();
+        }
+
+        private class Position {
+            private int x;
+            private int y;
+            private PDPage page;
+            private int pageNum;
+
+            private Position(int x, int y, PDPage page, int pageNum) {
+                this.x = x;
+                this.y = y;
+                this.page = page;
+                this.pageNum = pageNum;
             }
         }
     }

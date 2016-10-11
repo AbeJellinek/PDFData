@@ -2,6 +2,7 @@ package im.abe.pdfdata;
 
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
+import com.google.common.io.Files;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
@@ -36,8 +37,8 @@ public class AttachmentDataStorage extends WritableDataStorage {
             if (!entry.getKey().startsWith("META_"))
                 continue;
             PDComplexFileSpecification complexFile = entry.getValue();
-            tables.add(Table.fromCSV("Attachment", new StringReader(complexFile.getEmbeddedFile().getCOSObject()
-                    .toTextString().trim())));
+            tables.add(Table.fromCSV(Files.getNameWithoutExtension(complexFile.getFilename()),
+                    new StringReader(complexFile.getEmbeddedFile().getCOSObject().toTextString().trim())));
         }
 
         int pageNum = 1;
@@ -47,7 +48,7 @@ public class AttachmentDataStorage extends WritableDataStorage {
                     PDAnnotationFileAttachment fileAttachment = (PDAnnotationFileAttachment) annotation;
                     if (fileAttachment.getSubject().equals(STORED_DATA)) {
                         PDComplexFileSpecification complexFile = (PDComplexFileSpecification) fileAttachment.getFile();
-                        tables.add(Table.fromCSV("Page " + pageNum + " Attachment",
+                        tables.add(Table.fromCSV(Files.getNameWithoutExtension(complexFile.getFilename()),
                                 new StringReader(complexFile.getEmbeddedFile().getCOSObject()
                                         .toTextString().trim())));
                     }

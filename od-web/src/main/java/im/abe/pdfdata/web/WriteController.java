@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 @Controller
 public class WriteController {
@@ -37,15 +34,16 @@ public class WriteController {
         InputStream dataIn = data.getInputStream();
         Destination destination = Destination.fragment(fragment);
 
-        final String fileName = data.getOriginalFilename();
-        final String nameWithoutExtension = Files.getNameWithoutExtension(fileName);
+        // File.getName() is called because Opera sometimes sends the full path. Ew.
+        final String fileName = new File(pdf.getOriginalFilename()).getName();
+        final String name = destination.nameAttachment(doc, fileName);
 
         final Table table;
         if (DataStorage.isXlsFile(fileName)) {
-            table = Table.fromXLS(nameWithoutExtension, dataIn);
+            table = Table.fromXLS(name, dataIn);
         } else {
             // assume CSV
-            table = Table.fromCSV(nameWithoutExtension, new InputStreamReader(dataIn));
+            table = Table.fromCSV(name, new InputStreamReader(dataIn));
         }
 
         write(new AttachmentDataStorage(), doc, table, destination);
@@ -56,7 +54,7 @@ public class WriteController {
 
         response.setHeader("Content-Type", "application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\"" +
-                nameWithoutExtension + "_data.pdf" + "\"");
+                Files.getNameWithoutExtension(fileName) + "_data.pdf" + "\"");
 
         return new ByteArrayResource(bytes.toByteArray());
     }
