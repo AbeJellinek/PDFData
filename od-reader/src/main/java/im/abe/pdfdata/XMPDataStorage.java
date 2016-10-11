@@ -30,12 +30,12 @@ public class XMPDataStorage extends DataStorage {
 
             List<String> columns = columnProperties.stream().map(XMPProperty::getValue).collect(Collectors.toList());
 
-            List<List<Table.Cell>> cells = new ArrayList<>();
-            List<Table.Cell> currentRow = new ArrayList<>();
+            List<List<String>> cells = new ArrayList<>();
+            List<String> currentRow = new ArrayList<>();
             int index = 0;
 
             for (XMPProperty prop : items) {
-                currentRow.add(new Table.Cell(prop.getValue()));
+                currentRow.add(prop.getValue());
                 index++;
 
                 if (index >= rowSize) {

@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -33,17 +34,17 @@ public class Table {
     private static final CSVFormat FORMAT = CSVFormat.EXCEL.withHeader();
     private String name;
     private List<String> columnNames;
-    private List<List<Cell>> cells;
+    private List<List<String>> cells;
 
-    public Table(String name, List<String> columnNames, List<List<Cell>> cells) {
+    public Table(String name, List<String> columnNames, List<List<String>> cells) {
         this.name = name;
         this.columnNames = columnNames;
         this.cells = cells;
     }
 
-    public Cell get(int row, int column) {
+    public String get(int row, int column) {
         if (row >= 0 && row < cells.size() && column >= 0) {
-            List<Cell> rowList = cells.get(row);
+            List<String> rowList = cells.get(row);
             if (column < rowList.size()) {
                 return rowList.get(column);
             } else {
@@ -74,7 +75,7 @@ public class Table {
         return columnNames;
     }
 
-    public List<List<Cell>> getCells() {
+    public List<List<String>> getCells() {
         return cells;
     }
 
@@ -108,11 +109,11 @@ public class Table {
 
     private static List<Map<String, String>> toJSONData(Table table) {
         List<Map<String, String>> data = new ArrayList<>();
-        for (List<Cell> row : table.cells) {
+        for (List<String> row : table.cells) {
             Map<String, String> map = new HashMap<>();
             for (int i = 0; i < row.size(); i++) {
-                Cell cell = row.get(i);
-                map.put(table.getColumnName(i), cell.getValue());
+                String cell = row.get(i);
+                map.put(table.getColumnName(i), cell);
             }
             data.add(map);
         }
@@ -131,12 +132,12 @@ public class Table {
     private String toRdfFormat(String lang) {
         Model model = ModelFactory.createDefaultModel();
 
-        for (List<Cell> columns : cells) {
+        for (List<String> columns : cells) {
             Resource row = model.createResource();
             for (int i = 0; i < columns.size(); i++) {
-                Cell cell = columns.get(i);
+                String cell = columns.get(i);
                 String escapedName = UrlEscapers.urlFragmentEscaper().escape(columnNames.get(i));
-                row.addLiteral(model.createProperty("#", escapedName), cell.getValue());
+                row.addLiteral(model.createProperty("#", escapedName), cell);
             }
         }
 
@@ -173,11 +174,11 @@ public class Table {
         CSVParser parser = FORMAT.parse(reader);
 
         List<String> headers = getHeaders(parser);
-        List<List<Table.Cell>> cells = new ArrayList<>();
+        List<List<String>> cells = new ArrayList<>();
         for (CSVRecord record : parser) {
-            List<Table.Cell> row = new ArrayList<>();
+            List<String> row = new ArrayList<>();
             for (String value : record)
-                row.add(new Cell(value));
+                row.add(value);
             cells.add(row);
         }
 
@@ -199,15 +200,15 @@ public class Table {
         List<String> headers = getHeaders(headerRow);
 
         int runningWidth = headers.size();
-        List<List<Table.Cell>> tableCells = new ArrayList<>();
+        List<List<String>> tableCells = new ArrayList<>();
 
         final Iterator<Row> rows = sheet.rowIterator();
         rows.next();
         while (rows.hasNext()) {
-            final List<Table.Cell> resultRow = new LinkedList<>();
+            final List<String> resultRow = new LinkedList<>();
             final Row row = rows.next();
-            for (org.apache.poi.ss.usermodel.Cell cell : row) {
-                resultRow.add(new Table.Cell(getCellValueAsString(cell)));
+            for (Cell cell : row) {
+                resultRow.add(getCellValueAsString(cell));
             }
             tableCells.add(resultRow);
             runningWidth = Math.max(runningWidth, resultRow.size());
@@ -226,72 +227,34 @@ public class Table {
     }
 
     private static List<String> getHeaders(Row headerRow) {
-        final Iterable<org.apache.poi.ss.usermodel.Cell> iterable = headerRow::cellIterator;
-        final Stream<org.apache.poi.ss.usermodel.Cell> stream = StreamSupport.stream(iterable.spliterator(), false);
+        final Iterable<Cell> iterable = headerRow::cellIterator;
+        final Stream<Cell> stream = StreamSupport.stream(iterable.spliterator(), false);
         return stream.map(Table::getCellValueAsString).collect(Collectors.toList());
     }
 
-    private static String getCellValueAsString(org.apache.poi.ss.usermodel.Cell cell) {
+    private static String getCellValueAsString(Cell cell) {
         switch (cell.getCellType()) {
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BLANK: {
+            case Cell.CELL_TYPE_BLANK: {
                 return "";
             }
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BOOLEAN: {
+            case Cell.CELL_TYPE_BOOLEAN: {
                 return Boolean.toString(cell.getBooleanCellValue());
             }
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_ERROR: {
+            case Cell.CELL_TYPE_ERROR: {
                 return "!! ERROR !!";
             }
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA: {
+            case Cell.CELL_TYPE_FORMULA: {
                 return cell.getCellFormula();
             }
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC: {
+            case Cell.CELL_TYPE_NUMERIC: {
                 return Double.toString(cell.getNumericCellValue());
             }
-            case org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING: {
+            case Cell.CELL_TYPE_STRING: {
                 return cell.getStringCellValue();
             }
             default: {
                 return "!! UNKNOWN CELL TYPE " + cell.getCellType() + " !!";
             }
-        }
-    }
-
-    /**
-     * A cell within the table. At the moment, this class is just a wrapper around a string, but it exists in order to
-     * facilitate adding typed cells in the future.
-     */
-    public static class Cell {
-        private String value;
-
-        public Cell(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Cell cell = (Cell) o;
-            return Objects.equals(value, cell.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return value;
         }
     }
 }

@@ -21,7 +21,7 @@ public class AnnotationDataStorage extends DataStorage {
     @Override
     public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         List<String> columns = Collections.singletonList("Annotation");
-        List<List<Table.Cell>> cells = new ArrayList<>();
+        List<List<String>> cells = new ArrayList<>();
         PDPageTree pages = doc.getDocumentCatalog().getPages();
 
         boolean hasAnnotations = false;
@@ -33,7 +33,7 @@ public class AnnotationDataStorage extends DataStorage {
                     hasAnnotations = true;
                 }
 
-                cells.add(Collections.singletonList(new Table.Cell(annotation.getContents())));
+                cells.add(Collections.singletonList(annotation.getContents()));
             }
         }
 

@@ -24,18 +24,17 @@ public class FormDataStorage extends DataStorage {
             return new ArrayList<>();
 
         List<String> columns = new ArrayList<>();
-        List<Table.Cell> cells = new ArrayList<>();
+        List<String> cells = new ArrayList<>();
         for (PDField field : form.getFields()) {
             columns.add(field.getPartialName());
             try {
                 String value = field.getValueAsString();
-                cells.add(new Table.Cell(
-                        value == null || value.equals("\u00fe\u00ff") ? "" : value));
+                cells.add(value == null || value.equals("\u00fe\u00ff") ? "" : value);
                 // "\u00fe\u00ff" seems to be the null code for PDF form fields. Need to research.
             } catch (RuntimeException e) {
                 // getValue() can throw a wide variety of interesting exceptions,
                 // even though it promises only to throw IOException (and never does). We don't want any of them.
-                cells.add(new Table.Cell(""));
+                cells.add("");
             }
         }
         return Lists.newArrayList(new Table("Form", columns, Collections.singletonList(cells)));

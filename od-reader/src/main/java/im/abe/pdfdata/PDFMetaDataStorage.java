@@ -14,7 +14,7 @@ public class PDFMetaDataStorage extends DataStorage {
     @Override
     public List<Table> read(PDDocument doc, XMPMeta xmp) throws XMPException, IOException {
         List<String> keys = new ArrayList<>();
-        List<Table.Cell> values = new ArrayList<>();
+        List<String> values = new ArrayList<>();
 
         XMPIterator iter = xmp.iterator();
         while (iter.hasNext()) {
@@ -22,12 +22,12 @@ public class PDFMetaDataStorage extends DataStorage {
 
             if (info.getPath() != null) {
                 keys.add(info.getPath());
-                values.add(new Table.Cell(info.getValue()));
+                values.add(info.getValue());
             }
         }
 
         List<Table> tables = new ArrayList<>();
-        List<List<Table.Cell>> cells = new ArrayList<>();
+        List<List<String>> cells = new ArrayList<>();
         cells.add(values);
         tables.add(new Table("Metadata", keys, cells));
 
