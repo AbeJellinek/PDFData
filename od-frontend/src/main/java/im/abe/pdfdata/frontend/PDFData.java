@@ -25,8 +25,8 @@ public class PDFData {
 
     @Parameters(separators = "=", commandDescription = "Read data from a PDF file")
     private static class ReadCommand {
-        @Parameter(names = "--format", description = "Output format (values: JSON, CSV, RDF/XML, TURTLE)")
-        private String outputFormat = "CSV";
+        @Parameter(names = {"-f", "--format"}, description = "Output format (values: JSON, CSV, RDF/XML, TURTLE)")
+        private String outputFormat = "TURTLE";
 
         @Parameter(description = "Input PDF file", required = true)
         private List<String> inputPaths;
@@ -111,7 +111,7 @@ public class PDFData {
         jc.parse(args);
 
         if (pdfData.help) {
-            printHelpAndExit(jc);
+            printHelpAndExit();
         } else if (Objects.equals(jc.getParsedCommand(), "read")) {
             for (String path : read.inputPaths) {
                 File pdfFile = new File(path);
@@ -159,26 +159,29 @@ public class PDFData {
 
             new PDFData().write(storage, sourceFile, pdfFile);
         } else {
-            printHelpAndExit(jc);
+            printHelpAndExit();
         }
     }
 
     private static void requireThat(boolean condition, String error, JCommander jc) {
         if (!condition) {
             System.err.println("Error: " + error + "\n");
-            printHelpAndExit(jc);
+            printHelpAndExit();
         }
     }
 
-    private static void printHelpAndExit(JCommander jc) {
+    private static void printHelpAndExit() {
         // I'm really not sure of how this should be formatted, but it's fine for now.
 
         System.out.println("Usage: pdfdata\n" +
-                "    read  <pdf file> [-o output file]\n" +
+                "    read  <pdf file> [-o output file] [-f format]\n" +
                 "    write <source file> <pdf file>\n\n" +
 
                 "Options:\n" +
-                "    -h, --help: print this help message and exit");
+                "    -h, --help: print this help message and exit\n" +
+                "\n" +
+                "Supported Formats:\n" +
+                "    TURTLE (default), CSV, JSON, RDF/XML");
         System.exit(1);
     }
 }
