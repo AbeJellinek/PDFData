@@ -47,15 +47,11 @@ __Note:__ Gradle may indicate a failure if you run without supplying any argumen
 This is simply because the program returns a non-zero exit code.
 
     Usage: pdfdata
-        read  <pdf file> [output file]
-        write <storage type> <source file> <pdf file>
-
+        read  <pdf file> [-o output file] [-f format]
+        write <source file> <pdf file>
+    
     Options:
-        -h, --help:      print this help message and exit
-        -O, --overwrite: overwrite the output file if it exists
-
-    Storage Types:
-        annotations, ann, an: Annotation-based
-        attachments, att, at: Attachment-based
-        forms, form, f:       Form-based
-        xmp, meta, x, m:      Metadata-based
+        -h, --help: print this help message and exit
+    
+    Supported Formats:
+        TURTLE (default), CSV, JSON, RDF/XML
