@@ -32,6 +32,7 @@ import java.util.stream.StreamSupport;
  */
 public class Table {
     private static final CSVFormat FORMAT = CSVFormat.EXCEL.withHeader();
+
     private String name;
     private List<String> columnNames;
     private List<List<String>> cells;

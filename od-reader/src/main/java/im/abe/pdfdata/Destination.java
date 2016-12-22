@@ -10,6 +10,7 @@ import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,8 @@ public abstract class Destination {
     public abstract void writeAttachment(PDDocument doc, PDComplexFileSpecification file) throws IOException;
 
     public abstract String nameAttachment(PDDocument doc, String pdfName);
+
+    public abstract String toFragmentIdentifier();
 
     private static Map<String, String> parseFragmentIdentifier(String fragment) throws IllegalArgumentException {
         try {
@@ -57,7 +60,7 @@ public abstract class Destination {
         if (parameters.containsKey(KEY_NAMEDDEST))
             return named(parameters.get(KEY_NAMEDDEST));
         if (parameters.containsKey(KEY_PAGE))
-            return page(Integer.parseInt(parameters.get(KEY_PAGE)) - 1);
+            return page(Integer.parseInt(parameters.get(KEY_PAGE)));
         return document();
     }
 
@@ -97,6 +100,11 @@ public abstract class Destination {
             return pdfName;
         }
 
+        @Override
+        public String toFragmentIdentifier() {
+            return "#";
+        }
+
         private <K, V> Map<K, V> intoMap(Map<K, V> firstMap) {
             if (firstMap == null) {
                 return new HashMap<>();
@@ -107,12 +115,8 @@ public abstract class Destination {
     }
 
     private static class PageDestination extends Destination {
-        private PDPage page;
         private int pageNumber;
-
-        public PageDestination(PDPage page) {
-            this.page = page;
-        }
+        private PDPage page;
 
         public PageDestination(int pageNumber) {
             this.pageNumber = pageNumber;
@@ -145,6 +149,11 @@ public abstract class Destination {
         public String nameAttachment(PDDocument doc, String pdfName) {
             return pdfName + "-" + pageNumber;
         }
+
+        @Override
+        public String toFragmentIdentifier() {
+            return "#" + KEY_PAGE + "=" + pageNumber;
+        }
     }
 
     private static class NamedDestination extends Destination {
@@ -160,7 +169,7 @@ public abstract class Destination {
             Position position = findPosition(doc);
 
             if (position.x == -1 && position.y == -1) {
-                new PageDestination(position.page).writeAttachment(doc, file);
+                new PageDestination(position.pageNum).writeAttachment(doc, file);
             } else {
                 PDPage page = position.page;
 
@@ -235,6 +244,15 @@ public abstract class Destination {
             }
 
             return builder.toString();
+        }
+
+        @Override
+        public String toFragmentIdentifier() {
+            try {
+                return "#" + KEY_NAMEDDEST + "=" + URLEncoder.encode(name, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException("Failed to encode as URL.", e);
+            }
         }
 
         private class Position {

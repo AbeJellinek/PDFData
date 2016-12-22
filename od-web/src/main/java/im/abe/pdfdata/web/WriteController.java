@@ -3,43 +3,101 @@ package im.abe.pdfdata.web;
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
-import com.google.common.io.Files;
 import im.abe.pdfdata.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.List;
+import java.util.Random;
+import java.util.regex.Pattern;
 
 @Controller
 public class WriteController {
-    @RequestMapping(value = "/write/upload", method = RequestMethod.POST)
-    @ResponseBody
-    public Resource upload(@RequestParam("pdf") MultipartFile pdf,
-                           @RequestParam("data") MultipartFile data,
-                           @RequestParam("fragment") String fragment,
-                           HttpServletResponse response) throws IOException, XMPException {
+    private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir", "pdfdata_tmp"));
 
-        InputStream pdfIn = pdf.getInputStream();
+    static {
+        if (!TEMP_DIR.exists() && !TEMP_DIR.mkdirs()) {
+            throw new RuntimeException("Failed to create temporary upload directory!");
+        }
+    }
+
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String write() {
+        return "index";
+    }
+
+    @RequestMapping(value = "/write", method = RequestMethod.POST)
+    public String edit(@RequestParam("pdf") MultipartFile pdf,
+                       Model model) throws IOException, XMPException {
+
+        InputStream in = pdf.getInputStream();
+        PDDocument doc = PDDocument.load(in);
+        in.close();
+
+        // File.getName() is called because Opera sometimes sends the full path. Ew.
+        model.addAttribute("fileName", new File(pdf.getOriginalFilename()).getName());
+        model.addAttribute("contents", getPreview(doc));
+
+        doc.close();
+
+        StringBuilder tokenBuilder = new StringBuilder("file_");
+        Random random = new Random();
+        for (int i = 0; i < 32; i++) {
+            int choice = random.nextInt(8);
+            if (choice < 6) {
+                tokenBuilder.append((char) ('a' + random.nextInt(26)));
+            } else if (choice == 6) {
+                tokenBuilder.append((char) ('A' + random.nextInt(26)));
+            } else if (choice == 7) {
+                if (tokenBuilder.charAt(tokenBuilder.length() - 1) == '_')
+                    tokenBuilder.append(random.nextInt(10));
+                else
+                    tokenBuilder.append('_');
+            }
+        }
+
+        String token = tokenBuilder.toString();
+        File file = new File(TEMP_DIR, token);
+        file.deleteOnExit();
+        pdf.transferTo(file);
+        model.addAttribute("token", token);
+
+        return "editor";
+    }
+
+    @RequestMapping(value = "/write/upload", method = RequestMethod.POST)
+    public String upload(@RequestParam("token") String token,
+                         @RequestParam("fileName") String fileName,
+                         @RequestParam("data") MultipartFile data,
+                         @RequestParam("fragment") String fragment,
+                         Model model) throws IOException, XMPException {
+
+        if (Pattern.matches("[^a-zA-Z0-9_]", token))
+            throw new IllegalArgumentException("Invalid token!");
+
+        File pdf = new File(TEMP_DIR, token);
+
+        InputStream pdfIn = new FileInputStream(pdf);
         PDDocument doc = PDDocument.load(pdfIn);
+        pdfIn.close();
 
         InputStream dataIn = data.getInputStream();
         Destination destination = Destination.fragment(fragment);
 
-        // File.getName() is called because Opera sometimes sends the full path. Ew.
-        final String fileName = new File(pdf.getOriginalFilename()).getName();
         final String name = destination.nameAttachment(doc, fileName);
-
         final Table table;
-        if (DataStorage.isXlsFile(fileName)) {
+        if (DataStorage.isXlsFile(data.getOriginalFilename())) {
             table = Table.fromXLS(name, dataIn);
         } else {
             // assume CSV
@@ -48,15 +106,65 @@ public class WriteController {
 
         write(new AttachmentDataStorage(), doc, table, destination);
 
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        doc.save(bytes);
+        OutputStream pdfOut = new FileOutputStream(pdf);
+        doc.save(pdfOut);
+
+        model.addAttribute("token", token);
+        model.addAttribute("fileName", fileName);
+        model.addAttribute("contents", getPreview(doc));
+
         doc.close();
 
-        response.setHeader("Content-Type", "application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" +
-                Files.getNameWithoutExtension(fileName) + "_data.pdf" + "\"");
+        return "editor";
+    }
 
-        return new ByteArrayResource(bytes.toByteArray());
+    @RequestMapping(value = "/write/find", method = RequestMethod.POST)
+    @ResponseBody
+    public String find(@RequestParam("token") String token,
+                       @RequestParam("fileName") String fileName,
+                       @RequestParam("fragment") String fragment,
+                       HttpServletResponse response) throws IOException, XMPException {
+
+        if (Pattern.matches("[^a-zA-Z0-9_]", token))
+            throw new IllegalArgumentException("Invalid token!");
+
+        File pdf = new File(TEMP_DIR, token);
+
+        InputStream pdfIn = new FileInputStream(pdf);
+        PDDocument doc = PDDocument.load(pdfIn);
+        pdfIn.close();
+
+        Table found = new AttachmentDataStorage().find(doc, fileName, fragment);
+        if (found == null)
+            throw new IllegalArgumentException("Unknown attachment.");
+
+        response.setHeader("Content-Type", "application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+        return found.to(Format.CSV);
+    }
+
+    @RequestMapping(value = "/write/download/{token}/{fileName}", method = RequestMethod.GET)
+    public ResponseEntity<InputStreamResource> download(
+            @PathVariable("token") String token,
+            @PathVariable("fileName") String fileName) throws IOException, XMPException {
+
+        if (Pattern.matches("[^a-zA-Z0-9_]", token))
+            throw new IllegalArgumentException("Invalid token!");
+
+        File pdf = new File(TEMP_DIR, token);
+
+        HttpHeaders respHeaders = new HttpHeaders();
+        respHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        respHeaders.setContentLength(pdf.length());
+        respHeaders.setContentDispositionFormData("attachment", fileName + ".pdf");
+
+        InputStreamResource isr = new InputStreamResource(new FileInputStream(pdf));
+        return new ResponseEntity<>(isr, respHeaders, HttpStatus.OK);
+    }
+
+    private List<AttachmentDataStorage.FilePreview> getPreview(PDDocument doc) throws IOException, XMPException {
+        return new AttachmentDataStorage().preview(doc);
     }
 
     private void write(WritableDataStorage storage, PDDocument doc, Table table, Destination destination)
