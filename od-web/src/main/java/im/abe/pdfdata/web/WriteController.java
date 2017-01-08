@@ -38,32 +38,13 @@ public class WriteController {
         return "index";
     }
 
-    @RequestMapping(value = "/write", method = RequestMethod.POST)
-    public String edit(@RequestParam("pdf") MultipartFile pdf, @RequestParam("download") boolean download,
-                       Model model, HttpServletResponse response) throws IOException, XMPException {
+    @RequestMapping(value = "/write", method = RequestMethod.POST, params = "download=false")
+    public String edit(@RequestParam("pdf") MultipartFile pdf,
+                       Model model) throws IOException, XMPException {
 
         InputStream in = pdf.getInputStream();
         PDDocument doc = PDDocument.load(in);
         in.close();
-
-        if (download) {
-            PDDocumentCatalog catalog = doc.getDocumentCatalog();
-            XMPMeta xmp;
-            if (catalog.getMetadata() == null) {
-                xmp = XMPMetaFactory.create();
-            } else {
-                xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
-            }
-
-            List<Table> tables = new ArrayList<>();
-
-            tables.addAll(new AnnotationDataStorage().read(doc, xmp));
-            tables.addAll(new AttachmentDataStorage().read(doc, xmp));
-            tables.addAll(new FormDataStorage().read(doc, xmp));
-            tables.addAll(new XMPDataStorage().read(doc, xmp));
-
-            zipAll(tables, Format.CSV, response);
-        }
 
         // File.getName() is called because Opera sometimes sends the full path. Ew.
         model.addAttribute("fileName", new File(pdf.getOriginalFilename()).getName());
@@ -94,6 +75,32 @@ public class WriteController {
         model.addAttribute("token", token);
 
         return "editor";
+    }
+
+    @RequestMapping(value = "/write", method = RequestMethod.POST, params = "download=true")
+    public void downloadAll(@RequestParam("pdf") MultipartFile pdf,
+                            HttpServletResponse response) throws IOException, XMPException {
+
+        InputStream in = pdf.getInputStream();
+        PDDocument doc = PDDocument.load(in);
+        in.close();
+
+        PDDocumentCatalog catalog = doc.getDocumentCatalog();
+        XMPMeta xmp;
+        if (catalog.getMetadata() == null) {
+            xmp = XMPMetaFactory.create();
+        } else {
+            xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
+        }
+
+        List<Table> tables = new ArrayList<>();
+
+        tables.addAll(new AnnotationDataStorage().read(doc, xmp));
+        tables.addAll(new AttachmentDataStorage().read(doc, xmp));
+        tables.addAll(new FormDataStorage().read(doc, xmp));
+        tables.addAll(new XMPDataStorage().read(doc, xmp));
+
+        zipAll(tables, Format.CSV, response);
     }
 
     @RequestMapping(value = "/write/upload", method = RequestMethod.POST)
