@@ -18,9 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 public class WriteController {
@@ -38,12 +39,31 @@ public class WriteController {
     }
 
     @RequestMapping(value = "/write", method = RequestMethod.POST)
-    public String edit(@RequestParam("pdf") MultipartFile pdf,
-                       Model model) throws IOException, XMPException {
+    public String edit(@RequestParam("pdf") MultipartFile pdf, @RequestParam("download") boolean download,
+                       Model model, HttpServletResponse response) throws IOException, XMPException {
 
         InputStream in = pdf.getInputStream();
         PDDocument doc = PDDocument.load(in);
         in.close();
+
+        if (download) {
+            PDDocumentCatalog catalog = doc.getDocumentCatalog();
+            XMPMeta xmp;
+            if (catalog.getMetadata() == null) {
+                xmp = XMPMetaFactory.create();
+            } else {
+                xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
+            }
+
+            List<Table> tables = new ArrayList<>();
+
+            tables.addAll(new AnnotationDataStorage().read(doc, xmp));
+            tables.addAll(new AttachmentDataStorage().read(doc, xmp));
+            tables.addAll(new FormDataStorage().read(doc, xmp));
+            tables.addAll(new XMPDataStorage().read(doc, xmp));
+
+            zipAll(tables, Format.CSV, response);
+        }
 
         // File.getName() is called because Opera sometimes sends the full path. Ew.
         model.addAttribute("fileName", new File(pdf.getOriginalFilename()).getName());
@@ -178,6 +198,32 @@ public class WriteController {
         }
 
         storage.write(doc, xmp, table, destination);
+    }
+
+    private void zipAll(List<Table> tables, Format format, HttpServletResponse response) throws IOException {
+        if (tables.size() != 1) {
+            response.setContentType("application/zip");
+            response.setHeader("Content-Disposition", "attachment; filename=\"download.zip\"");
+            ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
+            Map<String, Integer> nameCounts = new HashMap<>();
+            for (Table table : tables) {
+                int count = nameCounts.getOrDefault(table.getName(), 0);
+                nameCounts.put(table.getName(), count + 1);
+
+                ZipEntry entry = new ZipEntry(table.getName() + (count == 0 ? "" : "_" + count)
+                        + format.getExtension());
+                byte[] serialized = table.to(format).getBytes("UTF-8");
+                entry.setSize(serialized.length);
+                zos.putNextEntry(entry);
+                zos.write(serialized);
+                zos.closeEntry();
+            }
+
+            zos.close();
+        } else {
+            response.setContentType(format.getMime());
+            response.getOutputStream().write(tables.get(0).to(format).getBytes("UTF-8"));
+        }
     }
 
 }
