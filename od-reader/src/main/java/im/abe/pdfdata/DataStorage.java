@@ -49,4 +49,15 @@ public abstract class DataStorage {
         final String extension = Files.getFileExtension(fileName).toLowerCase();
         return "xls".equals(extension) || "xlsx".equals(extension);
     }
+
+    /**
+     * Return true if this MIME type denotes an XLS or XLSX file.
+     *
+     * @param mime the MIME type to test
+     * @return true if it's an XLS or XLSX file, false otherwise
+     */
+    public static boolean isXlsType(String mime) {
+        return "application/vnd.ms-excel".equals(mime) ||
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(mime);
+    }
 }

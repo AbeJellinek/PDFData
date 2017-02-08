@@ -18,6 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -25,6 +28,9 @@ import java.util.zip.ZipOutputStream;
 
 @Controller
 public class WriteController {
+    /**
+     * The system temp directory.
+     */
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir", "pdfdata_tmp"));
 
     static {
@@ -131,6 +137,8 @@ public class WriteController {
             table = Table.fromCSV(name, new InputStreamReader(dataIn));
         }
 
+        dataIn.close();
+
         write(new AttachmentDataStorage(), doc, table, destination);
 
         OutputStream pdfOut = new FileOutputStream(pdf);
@@ -190,10 +198,68 @@ public class WriteController {
         return new ResponseEntity<>(isr, respHeaders, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/combine", method = RequestMethod.GET)
+    public void quickCombine(
+            @RequestParam("pdf") String pdfUrl,
+            @RequestParam("data") String[] data,
+            @RequestParam(value = "loc", defaultValue = "#") String[] loc,
+            HttpServletResponse response) throws IOException, XMPException, URISyntaxException {
+
+        URLConnection pdfConnection = loadUrl(pdfUrl);
+        InputStream pdfIn = pdfConnection.getInputStream();
+        PDDocument doc = PDDocument.load(pdfIn);
+        pdfIn.close();
+
+        for (int i = 0; i < data.length; i++) {
+            URLConnection dataConnection = loadUrl(data[i]);
+            InputStream dataIn = dataConnection.getInputStream();
+            Destination destination = Destination.fragment(loc.length > i ? loc[i] : "#");
+
+            final String name = destination.nameAttachment(doc, "attachment");
+            final Table table;
+            if (DataStorage.isXlsType(dataConnection.getContentType())) {
+                table = Table.fromXLS(name, dataIn);
+            } else {
+                // assume CSV
+                table = Table.fromCSV(name, new InputStreamReader(dataIn));
+            }
+
+            dataIn.close();
+
+            write(new AttachmentDataStorage(), doc, table, destination);
+        }
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=\"download.pdf\"");
+        doc.save(response.getOutputStream());
+    }
+
+    private URLConnection loadUrl(String pdfUrl) throws URISyntaxException, IOException {
+        return new URI(pdfUrl).toURL().openConnection();
+    }
+
+    /**
+     * Get a list of attachments on a given PDF document for preview purposes.
+     *
+     * @param doc The document. Must not be null.
+     * @return A list of file preview objects.
+     * @throws IOException  If there's a read error in PDF processing.
+     * @throws XMPException If there's a read error in XMP processing.
+     */
     private List<AttachmentDataStorage.FilePreview> getPreview(PDDocument doc) throws IOException, XMPException {
         return new AttachmentDataStorage().preview(doc);
     }
 
+    /**
+     * Write a table to a destination using the given storage method.
+     *
+     * @param storage     The storage method. Must be writable.
+     * @param doc         The PDF document.
+     * @param table       The table to write.
+     * @param destination The destination.
+     * @throws IOException  If there's a read/write error in PDF processing.
+     * @throws XMPException If there's a read/write error in XMP processing.
+     */
     private void write(WritableDataStorage storage, PDDocument doc, Table table, Destination destination)
             throws IOException, XMPException {
         PDDocumentCatalog catalog = doc.getDocumentCatalog();
