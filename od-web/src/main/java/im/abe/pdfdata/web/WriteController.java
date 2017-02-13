@@ -203,6 +203,7 @@ public class WriteController {
             @RequestParam("pdf") String pdfUrl,
             @RequestParam("data") String[] data,
             @RequestParam(value = "loc", defaultValue = "#") String[] loc,
+            @RequestParam(value = "name", defaultValue = "attachment") String pdfName,
             HttpServletResponse response) throws IOException, XMPException, URISyntaxException {
 
         URLConnection pdfConnection = loadUrl(pdfUrl);
@@ -215,13 +216,13 @@ public class WriteController {
             InputStream dataIn = dataConnection.getInputStream();
             Destination destination = Destination.fragment(loc.length > i ? loc[i] : "#");
 
-            final String name = destination.nameAttachment(doc, "attachment");
+            final String attachmentName = destination.nameAttachment(doc, pdfName);
             final Table table;
             if (DataStorage.isXlsType(dataConnection.getContentType())) {
-                table = Table.fromXLS(name, dataIn);
+                table = Table.fromXLS(attachmentName, dataIn);
             } else {
                 // assume CSV
-                table = Table.fromCSV(name, new InputStreamReader(dataIn));
+                table = Table.fromCSV(attachmentName, new InputStreamReader(dataIn));
             }
 
             dataIn.close();
