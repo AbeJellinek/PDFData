@@ -235,8 +235,35 @@ public class WriteController {
         doc.save(response.getOutputStream());
     }
 
-    private URLConnection loadUrl(String pdfUrl) throws URISyntaxException, IOException {
-        return new URI(pdfUrl).toURL().openConnection();
+    @RequestMapping("/extract")
+    public void quickExtract(@RequestParam("pdf") String pdfUrl,
+                             HttpServletResponse response) throws IOException, XMPException, URISyntaxException {
+
+        URLConnection pdfConnection = loadUrl(pdfUrl);
+        InputStream pdfIn = pdfConnection.getInputStream();
+        PDDocument doc = PDDocument.load(pdfIn);
+        pdfIn.close();
+
+        PDDocumentCatalog catalog = doc.getDocumentCatalog();
+        XMPMeta xmp;
+        if (catalog.getMetadata() == null) {
+            xmp = XMPMetaFactory.create();
+        } else {
+            xmp = XMPMetaFactory.parse(catalog.getMetadata().createInputStream());
+        }
+
+        List<Table> tables = new ArrayList<>();
+
+        tables.addAll(new AnnotationDataStorage().read(doc, xmp));
+        tables.addAll(new AttachmentDataStorage().read(doc, xmp));
+        tables.addAll(new FormDataStorage().read(doc, xmp));
+        tables.addAll(new XMPDataStorage().read(doc, xmp));
+
+        zipAll(tables, Format.CSV, response);
+    }
+
+    private URLConnection loadUrl(String url) throws URISyntaxException, IOException {
+        return new URI(url).toURL().openConnection();
     }
 
     /**
