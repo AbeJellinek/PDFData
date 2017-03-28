@@ -46,9 +46,6 @@ You can also try it out on the web [here](https://pdf.abe.im).
 To run the project outside of an IDE, `cd` into the project's root directory and run `./gradlew run`.
 A help message should be printed. Additional arguments can be supplied after `run`.
 
-__Note:__ Gradle may indicate a failure if you run without supplying any arguments.
-This is simply because the program returns a non-zero exit code.
-
     Usage: pdfdata
         read  <pdf file> [-o output file] [-f format]
         write <source file> <pdf file>

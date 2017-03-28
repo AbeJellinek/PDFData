@@ -111,7 +111,7 @@ public class PDFData {
         jc.parse(args);
 
         if (pdfData.help) {
-            printHelpAndExit();
+            printHelpAndExit(0);
         } else if (Objects.equals(jc.getParsedCommand(), "read")) {
             for (String path : read.inputPaths) {
                 File pdfFile = new File(path);
@@ -159,18 +159,18 @@ public class PDFData {
 
             new PDFData().write(storage, sourceFile, pdfFile);
         } else {
-            printHelpAndExit();
+            printHelpAndExit(0);
         }
     }
 
     private static void requireThat(boolean condition, String error, JCommander jc) {
         if (!condition) {
             System.err.println("Error: " + error + "\n");
-            printHelpAndExit();
+            printHelpAndExit(1);
         }
     }
 
-    private static void printHelpAndExit() {
+    private static void printHelpAndExit(int status) {
         // I'm really not sure of how this should be formatted, but it's fine for now.
 
         System.out.println("Usage: pdfdata\n" +
@@ -182,6 +182,6 @@ public class PDFData {
                 "\n" +
                 "Supported Formats:\n" +
                 "    TURTLE (default), CSV, JSON, RDF/XML");
-        System.exit(1);
+        System.exit(status);
     }
 }
