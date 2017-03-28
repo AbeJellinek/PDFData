@@ -37,11 +37,9 @@ It also has:
 
 There is a release, available as a command-line runnable JAR [here](https://github.com/Aiybe/PDFData/releases).
 
->Try it out by running 
-
 You can also try it out on the web [here](https://pdf.abe.im).
 
-`od-reader/src/test/resources/docs` contains four example PDF files, labeled based on the storage types they contain.
+`examples/` contains three example sets, labeled based on their contents.
 
 To run the project outside of an IDE, `cd` into the project's root directory and run `./gradlew run`.
 A help message should be printed. Additional arguments can be supplied after `run`.
