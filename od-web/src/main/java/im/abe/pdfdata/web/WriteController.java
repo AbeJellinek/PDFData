@@ -36,14 +36,30 @@ public class WriteController {
     static {
         if (!TEMP_DIR.exists() && !TEMP_DIR.mkdirs()) {
             throw new RuntimeException("Failed to create temporary upload directory!");
+            // this shouldn't happen - temp is writable - but we need a safeguard
         }
     }
 
+    /**
+     * This is the homepage of the site. Static, GET only.
+     *
+     * @return The "index" template.
+     */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String write() {
         return "index";
     }
 
+    /**
+     * This endpoint (POST only) displays the WIP editor interface. Stateful but user-friendly.
+     * A token is generated and provided to the data model for later edits.
+     *
+     * @param pdf   The PDF file to edit.
+     * @param model The data model for template filling.
+     * @return The editor template.
+     * @throws IOException  If reading the PDF file fails.
+     * @throws XMPException If the PDF file's XMP data is improperly formatted.
+     */
     @RequestMapping(value = "/write", method = RequestMethod.POST, params = "download=false")
     public String edit(@RequestParam("pdf") MultipartFile pdf,
                        Model model) throws IOException, XMPException {
@@ -83,6 +99,14 @@ public class WriteController {
         return "editor";
     }
 
+    /**
+     * This endpoint (POST only) simply downloads every stored data object in the uploaded PDF file.
+     *
+     * @param pdf      The PDF file.
+     * @param response A ZIP file response with the data in it.
+     * @throws IOException  If reading or writing fails.
+     * @throws XMPException If the PDF's XMP data is improperly formatted.
+     */
     @RequestMapping(value = "/write", method = RequestMethod.POST, params = "download=true")
     public void downloadAll(@RequestParam("pdf") MultipartFile pdf,
                             HttpServletResponse response) throws IOException, XMPException {
@@ -109,6 +133,18 @@ public class WriteController {
         zipAll(tables, Format.CSV, response);
     }
 
+    /**
+     * Adds a new data file to an existing PDF editing session.
+     *
+     * @param token    The session token.
+     * @param fileName The filename of the PDF.
+     * @param data     The new data to add. CSV format.
+     * @param fragment The fragment location to add the data to.
+     * @param model    The template data model.
+     * @return The editor template.
+     * @throws IOException  If reading or writing fails.
+     * @throws XMPException If the PDF's XMP data is malformed or modifying it fails.
+     */
     @RequestMapping(value = "/write/upload", method = RequestMethod.POST)
     public String upload(@RequestParam("token") String token,
                          @RequestParam("fileName") String fileName,
@@ -179,6 +215,13 @@ public class WriteController {
         return found.to(Format.CSV);
     }
 
+    /**
+     * @param token
+     * @param fileName
+     * @return
+     * @throws IOException
+     * @throws XMPException
+     */
     @RequestMapping(value = "/write/download/{token}/{fileName}", method = RequestMethod.GET)
     public ResponseEntity<InputStreamResource> download(
             @PathVariable("token") String token,
@@ -198,7 +241,20 @@ public class WriteController {
         return new ResponseEntity<>(isr, respHeaders, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/combine", method = RequestMethod.GET)
+    /**
+     * This endpoint stores data from given URL(s) in a PDF file and writes the result to the client.
+     * The {@code data} array should be at least as long as the {@code loc} array.
+     *
+     * @param pdfUrl   The PDF file's URL.
+     * @param data     An ordered set of CSV data file URLs.
+     * @param loc      An ordered set of fragment locations in the PDF corresponding to target locations for data files.
+     * @param pdfName  The filename to output with. Optional.
+     * @param response The HTTP response.
+     * @throws IOException        If reading or writing the inputs/response fails.
+     * @throws XMPException       If the XMP data in the PDF is improperly formatted.
+     * @throws URISyntaxException If one of the provided URLs is invalid.
+     */
+    @RequestMapping("/combine")
     public void quickCombine(
             @RequestParam("pdf") String pdfUrl,
             @RequestParam("data") String[] data,
@@ -235,6 +291,16 @@ public class WriteController {
         doc.save(response.getOutputStream());
     }
 
+    /**
+     * This endpoint allows for quick extraction of the contents of a PDF at a given URL.
+     * Intended for use by other web services or on the command line.
+     *
+     * @param pdfUrl   The PDF file's URL. Must be accessible by the PDFData server (i.e. not password-protected).
+     * @param response The HttpServletResponse object for the request.
+     * @throws IOException        If reading or writing the inputs/response fails.
+     * @throws XMPException       If the XMP data in the PDF is improperly formatted.
+     * @throws URISyntaxException If the provided URL is invalid.
+     */
     @RequestMapping("/extract")
     public void quickExtract(@RequestParam("pdf") String pdfUrl,
                              HttpServletResponse response) throws IOException, XMPException, URISyntaxException {
@@ -262,6 +328,14 @@ public class WriteController {
         zipAll(tables, Format.CSV, response);
     }
 
+    /**
+     * Convenience wrapper to load a String URL and return a connection object.
+     *
+     * @param url The URL.
+     * @return The newly-opened connection.
+     * @throws URISyntaxException If the URL is invalid/improperly formatted.
+     * @throws IOException        If opening the connection fails.
+     */
     private URLConnection loadUrl(String url) throws URISyntaxException, IOException {
         return new URI(url).toURL().openConnection();
     }
@@ -301,6 +375,14 @@ public class WriteController {
         storage.write(doc, xmp, table, destination);
     }
 
+    /**
+     * Write a list of tables to zipped files and output the ZIP to the given HTTP response.
+     *
+     * @param tables   The tables to write. Each should be named, but names need not be unique.
+     * @param format   The format to write tables in. CSV, Turtle, etc.
+     * @param response The response to write to.
+     * @throws IOException If the write operation fails.
+     */
     private void zipAll(List<Table> tables, Format format, HttpServletResponse response) throws IOException {
         if (tables.size() != 1) {
             response.setContentType("application/zip");
